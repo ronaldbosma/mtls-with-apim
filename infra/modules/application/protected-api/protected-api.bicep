@@ -99,5 +99,8 @@ resource validateUsingContext 'Microsoft.ApiManagement/service/apis/operations@2
       format: 'rawxml'
       value: loadTextContent('./validate-using-context.operation.xml')
     }
+    dependsOn: [
+      validateCertificateChainNamedValue
+    ]
   }
 }
