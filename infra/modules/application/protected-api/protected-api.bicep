@@ -35,6 +35,15 @@ resource validateCertificateChainNamedValue 'Microsoft.ApiManagement/service/nam
   }
 }
 
+// Add client certificate for 'Dev Client 01'
+resource devClient01Certificate 'Microsoft.ApiManagement/service/certificates@2025-03-01-preview' = {
+  name: 'dev-client-01'
+  parent: apiManagementService
+  properties: {
+    data: loadTextContent('../../../../self-signed-certificates/certificates/dev-client-01.without-markers.cer')
+  }
+}
+
 // API
 
 resource protectedApi 'Microsoft.ApiManagement/service/apis@2025-03-01-preview' = {
