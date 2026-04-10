@@ -153,7 +153,7 @@ module assignRolesToDeployer 'modules/shared/assign-roles-to-principal.bicep' = 
 // Application Resources
 //=============================================================================
 
-module echoApi 'modules/application/echo-api.bicep' = {
+module protectedApi 'modules/application/protected-api/protected-api.bicep' = {
   scope: resourceGroup
   params: {
     apiManagementServiceName: apiManagementSettings.serviceName

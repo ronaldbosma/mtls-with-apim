@@ -1,0 +1,41 @@
+<policies>
+    <inbound>
+        <base />
+
+        <validate-client-certificate validate-revocation="false" validate-trust="true"
+                                     validate-not-before="true" validate-not-after="true"
+                                     ignore-error="false">
+            <identities>
+                <identity subject="CN=Client 01" issuer-subject="CN=APIM Sample DEV Intermediate CA" />
+                <identity subject="CN=Client 02" issuer-subject="CN=APIM Sample DEV Intermediate CA" />
+            </identities>
+        </validate-client-certificate>
+
+        <!-- Returns a 200 OK with the client certificate details in the body -->
+        <return-response>
+            <set-status code="200" />
+            <set-body>@(context.Request.Certificate.ToString())</set-body>
+        </return-response>
+    </inbound>
+
+    <backend>
+        <base />
+    </backend>
+
+    <outbound>
+        <base />
+    </outbound>
+
+    <on-error>
+        <!--
+            Return info about the error so we can see why it was raised.
+            Don't do this in a real world scenario, as it might reveal too much information.
+        -->
+        <set-header name="Content-Type" exists-action="override">
+            <value>application/json</value>
+        </set-header>
+        <set-body>@(JsonConvert.SerializeObject(context.LastError))</set-body>
+
+        <base />
+    </on-error>
+</policies>
