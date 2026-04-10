@@ -72,6 +72,19 @@ Once you're done and want to clean up, run the `azd down` command. By including 
 azd down --purge
 ```
 
+## Configuration
+
+### Validate client certificate chain in Producted API
+
+By default, the Protected API does not validate the client certificate chain. This feature is not supported on v2 tier instances because they [do not support uploading CA certificates](https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-ca-certificates).
+It can be enabled through the `validateCertificateChainInProtectedApi` parameter in [main.parameters.json](/infra/main.parameters.json).
+
+To eable it, run the following command before deploying the template:
+
+```cmd
+azd env set VALIDATE_CERTIFICATE_CHAIN_IN_PROTECTED_API=true
+```
+
 ## Contents
 
 The repository consists of the following files and directories:

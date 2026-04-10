@@ -9,6 +9,9 @@
 @description('The name of the API Management service')
 param apiManagementServiceName string
 
+@description('Indicates whether the API should validate the certificate chain of the client certificate.')
+param validateCertificateChain bool
+
 //=============================================================================
 // Existing resources
 //=============================================================================
@@ -20,6 +23,19 @@ resource apiManagementService 'Microsoft.ApiManagement/service@2025-03-01-previe
 //=============================================================================
 // Resources
 //=============================================================================
+
+// Named Values
+
+resource validateCertificateChainNamedValue 'Microsoft.ApiManagement/service/namedValues@2025-03-01-preview' = {
+  name: 'validate-certificate-chain'
+  parent: apiManagementService
+  properties: {
+    displayName: 'validate-certificate-chain'
+    value: toLower(string(validateCertificateChain))
+  }
+}
+
+// API
 
 resource protectedApi 'Microsoft.ApiManagement/service/apis@2025-03-01-preview' = {
   name: 'protected-api'
@@ -51,6 +67,9 @@ resource validateUsingPolicy 'Microsoft.ApiManagement/service/apis/operations@20
       format: 'rawxml'
       value: loadTextContent('./validate-using-policy.operation.xml')
     }
+    dependsOn: [
+      validateCertificateChainNamedValue
+    ]
   }
 }
 

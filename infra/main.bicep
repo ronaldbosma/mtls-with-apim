@@ -30,6 +30,9 @@ param location string
 @description('The name of the environment to deploy to')
 param environmentName string
 
+@description('Indicates whether the Protected API should validate the certificate chain of the client certificate.')
+param validateCertificateChainInProtectedApi bool
+
 //=============================================================================
 // Variables
 //=============================================================================
@@ -157,6 +160,7 @@ module protectedApi 'modules/application/protected-api/protected-api.bicep' = {
   scope: resourceGroup
   params: {
     apiManagementServiceName: apiManagementSettings.serviceName
+    validateCertificateChain: validateCertificateChainInProtectedApi
   }
   dependsOn: [
     apiManagement
@@ -178,3 +182,6 @@ output AZURE_RESOURCE_GROUP string = resourceGroupName
 output AZURE_API_MANAGEMENT_GATEWAY_URL string = apiManagement.outputs.gatewayUrl
 output AZURE_KEY_VAULT_URI string = keyVault.outputs.vaultUri
 output AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS string = appGateway.outputs.publicIpAddress
+
+// Return configuration values
+output VALIDATE_CERTIFICATE_CHAIN_IN_PROTECTED_API bool = validateCertificateChainInProtectedApi
