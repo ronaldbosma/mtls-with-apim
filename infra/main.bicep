@@ -107,6 +107,7 @@ module apiManagement 'modules/services/api-management.bicep' = {
   }
   dependsOn: [
     appInsights
+    keyVault
   ]
 }
 
@@ -120,6 +121,9 @@ module appGateway './modules/services/application-gateway.bicep' = {
     apiManagementServiceName: apiManagementSettings.serviceName
     appInsightsSettings: appInsightsSettings
   }
+  dependsOn: [
+    appInsights
+  ]
 }
 
 module keyVault 'modules/services/key-vault.bicep' = {
