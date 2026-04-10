@@ -92,6 +92,7 @@ The repository consists of the following files and directories:
 │   ├── types                  [ Bicep user-defined types ]
 │   ├── main.bicep             [ Main infrastructure file ]
 │   └── main.parameters.json   [ Parameters file ]
+├── self-signed-certificates   [ Self-signed certificates used in mTLS scenarios ]
 ├── tests
 │   ├── IntegrationTests       [ Integration tests for automatically verifying different scenarios ]
 │   └── tests.http             [ HTTP requests to test the deployed resources ]
