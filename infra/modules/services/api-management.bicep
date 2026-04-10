@@ -88,6 +88,7 @@ resource apiManagementService 'Microsoft.ApiManagement/service@2025-03-01-previe
     publisherName: publisherName
     publisherEmail: publisherEmail
     customProperties: contains(apiManagementSettings.sku, 'Consumption') ? null : customProperties
+    enableClientCertificate: true
   }
   identity: {
     type: 'SystemAssigned'
