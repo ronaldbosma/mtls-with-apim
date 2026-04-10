@@ -5,9 +5,9 @@
 
 ### Validates client certificate using validate-client-certificate policy
 
-GET https://{{apimHostname}}/client-cert/validate-using-policy
+GET https://{{apimHostname}}/protected/validate-using-policy
 
 
 ### Validates client certificate using the context.Request.Certificate property
 
-GET https://{{apimHostname}}/client-cert/validate-using-context
+GET https://{{apimHostname}}/protected/validate-using-context
