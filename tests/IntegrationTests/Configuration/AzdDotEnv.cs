@@ -20,7 +20,10 @@ internal static class AzdDotEnv
     public static void Load(bool optional)
     {
         var azdEnvFilePath = LocateEnvFileOfDefaultAzdEnvironment(optional);
-        DotEnv.Load(options: new DotEnvOptions(ignoreExceptions: optional, envFilePaths: [azdEnvFilePath]));
+        if (!string.IsNullOrWhiteSpace(azdEnvFilePath))
+        {
+            DotEnv.Load(options: new DotEnvOptions(ignoreExceptions: optional, envFilePaths: new[] { azdEnvFilePath }));
+        }
     }
 
     private static string LocateEnvFileOfDefaultAzdEnvironment(bool optional)
