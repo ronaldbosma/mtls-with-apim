@@ -39,9 +39,10 @@ resource keyVault 'Microsoft.KeyVault/vaults@2025-05-01' = {
     }
     networkAcls: {
       bypass: 'AzureServices'
+      defaultAction: 'Allow'
     }
 
-    // Set enabled for template deployment to true so we can retrieve secrets from Key Vault using Bicep. 
+    // Set enabled for template deployment to true so we can retrieve secrets from Key Vault using Bicep.
     // For example: keyVault.getSecret('client-secret')
     // Documentation: https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/bicep-functions-resource#getsecret
     enabledForTemplateDeployment: true
