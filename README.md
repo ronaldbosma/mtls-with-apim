@@ -62,7 +62,7 @@ Once the prerequisites are installed on your machine, you can deploy this templa
 
 ### Demo
 
-See the [Demo Guide](demos/demo.md) for a step-by-step walkthrough on how to check and demonstrate the masking of query parameters.
+See the [Demo Guide](demos/demo.md) for a step-by-step walkthrough on how to check and demonstrate different mTLS scenarios with API Management.
 
 ### Clean up
 
@@ -140,7 +140,7 @@ For detailed guidance, refer to:
 ## Integration Tests
 
 The project includes integration tests built with **.NET 10** that validate various scenarios through the deployed Azure services.
-The tests send the same test requests described in the [Demo](./demos/demo.md) and are located in [EchoApiTests.cs](tests/IntegrationTests/EchoApiTests.cs).
+The tests send the same test requests described in the [Demo](./demos/demo.md) and are located in [IntegrationTests](tests/IntegrationTests).
 They automatically locate your azd environment's `.env` file if available, to retrieve necessary configuration. In the [pipeline](#pipeline) they rely on environment variables set in the workflow.
 
 ## Troubleshooting
@@ -152,12 +152,12 @@ If you've previously deployed this template and deleted the resources, you may e
 ```json
 {
   "code": "DeploymentFailed",
-  "target": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-maskqueryparams-nwe-kt2tx/providers/Microsoft.Resources/deployments/apiManagement",
+  "target": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-mtlsapim-nwe-kt2tx/providers/Microsoft.Resources/deployments/apiManagement",
   "message": "At least one resource deployment operation failed. Please list deployment operations for details. Please see https://aka.ms/arm-deployment-operations for usage details.",
   "details": [
     {
       "code": "ServiceAlreadyExistsInSoftDeletedState",
-      "message": "Api service apim-maskqueryparams-nwe-kt2tx was soft-deleted. In order to create the new service with the same name, you have to either undelete the service or purge it. See https://aka.ms/apimsoftdelete."
+      "message": "Api service apim-mtlsapim-nwe-kt2tx was soft-deleted. In order to create the new service with the same name, you have to either undelete the service or purge it. See https://aka.ms/apimsoftdelete."
     }
   ]
 }
@@ -166,5 +166,5 @@ If you've previously deployed this template and deleted the resources, you may e
 Use the [az apim deletedservice list](https://learn.microsoft.com/en-us/cli/azure/apim/deletedservice?view=azure-cli-latest#az-apim-deletedservice-list) Azure CLI command to list all deleted API Management services in your subscription. Locate the service that is in a soft-deleted state and purge it using the [purge](https://learn.microsoft.com/en-us/cli/azure/apim/deletedservice?view=azure-cli-latest#az-apim-deletedservice-purge) command. See the following example:
 
 ```cmd
-az apim deletedservice purge --location "norwayeast" --service-name "apim-maskqueryparams-nwe-kt2tx"
+az apim deletedservice purge --location "norwayeast" --service-name "apim-mtlsapim-nwe-kt2tx"
 ```
