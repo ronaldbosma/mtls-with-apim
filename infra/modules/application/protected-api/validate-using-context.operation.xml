@@ -4,8 +4,10 @@
 
         <choose>
             <when condition="@{
+                bool validateCertificateChain = {{validate-certificate-chain}};
+
                 return context.Request.Certificate == null ||
-                       !context.Request.Certificate.VerifyNoRevocation() ||
+                       (validateCertificateChain && !context.Request.Certificate.VerifyNoRevocation()) ||
                        !context.Deployment.Certificates.Any(c => c.Value.Thumbprint == context.Request.Certificate.Thumbprint);
             }">
                 <return-response>
