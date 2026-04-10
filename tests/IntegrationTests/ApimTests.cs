@@ -5,9 +5,6 @@ using IntegrationTests.Configuration;
 
 namespace IntegrationTests;
 
-/// <summary>
-/// Tests scenarios for a valid authorized client and invalid unauthorized client.
-/// </summary>
 [TestClass]
 public sealed class ApimTests
 {
