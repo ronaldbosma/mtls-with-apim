@@ -12,16 +12,15 @@ namespace IntegrationTests;
 [TestClass]
 public sealed class ProtectedApiTests
 {
-    private static readonly X509Certificate2 ValidClientCertificate = X509CertificateLoader.LoadPkcs12FromFile(@"C:\repos\ronaldbosma\mtls-with-apim\self-signed-certificates\certificates\dev-client-01.pfx", "P@ssw0rd");
-    private static readonly X509Certificate2 InvalidClientCertificate = X509CertificateLoader.LoadPkcs12FromFile(@"C:\repos\ronaldbosma\mtls-with-apim\self-signed-certificates\certificates\tst-client-01.pfx", "P@ssw0rd");
+    private static readonly TestConfiguration Config = TestConfiguration.Load();
+    private static readonly X509Certificate2 ValidClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/dev-client-01.pfx", "P@ssw0rd");
+    private static readonly X509Certificate2 InvalidClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/tst-client-01.pfx", "P@ssw0rd");
 
     [TestMethod]
     public async Task ValidateUsingPolicy_ValidClientCertificateProvided_200OkReturned()
     {
         // Arrange
-        var config = TestConfiguration.Load();
-
-        using var apimClient = new IntegrationTestHttpClient(config.AzureApiManagementGatewayUrl, ValidClientCertificate);
+        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, ValidClientCertificate);
 
         // Act
         var response = await apimClient.GetAsync("protected/validate-using-policy");
@@ -34,9 +33,7 @@ public sealed class ProtectedApiTests
     public async Task ValidateUsingPolicy_NoClientCertificateProvided_401UnauthorizedReturned()
     {
         // Arrange
-        var config = TestConfiguration.Load();
-
-        using var apimClient = new IntegrationTestHttpClient(config.AzureApiManagementGatewayUrl);
+        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl);
 
         // Act
         var response = await apimClient.GetAsync("protected/validate-using-policy");
@@ -52,9 +49,7 @@ public sealed class ProtectedApiTests
     public async Task ValidateUsingPolicy_InvalidClientCertificateProvided_401UnauthorizedReturned()
     {
         // Arrange
-        var config = TestConfiguration.Load();
-
-        using var apimClient = new IntegrationTestHttpClient(config.AzureApiManagementGatewayUrl, InvalidClientCertificate);
+        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, InvalidClientCertificate);
 
         // Act
         var response = await apimClient.GetAsync("protected/validate-using-policy");
@@ -70,9 +65,7 @@ public sealed class ProtectedApiTests
     public async Task ValidateUsingContext_ValidClientCertificateProvided_200OkReturned()
     {
         // Arrange
-        var config = TestConfiguration.Load();
-
-        using var apimClient = new IntegrationTestHttpClient(config.AzureApiManagementGatewayUrl, ValidClientCertificate);
+        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, ValidClientCertificate);
 
         // Act
         var response = await apimClient.GetAsync("protected/validate-using-context");
@@ -85,9 +78,7 @@ public sealed class ProtectedApiTests
     public async Task ValidateUsingContext_NoClientCertificateProvided_401UnauthorizedReturned()
     {
         // Arrange
-        var config = TestConfiguration.Load();
-
-        using var apimClient = new IntegrationTestHttpClient(config.AzureApiManagementGatewayUrl);
+        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl);
 
         // Act
         var response = await apimClient.GetAsync("protected/validate-using-context");
@@ -102,9 +93,7 @@ public sealed class ProtectedApiTests
     public async Task ValidateUsingContext_InvalidClientCertificateProvided_401UnauthorizedReturned()
     {
         // Arrange
-        var config = TestConfiguration.Load();
-
-        using var apimClient = new IntegrationTestHttpClient(config.AzureApiManagementGatewayUrl, InvalidClientCertificate);
+        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, InvalidClientCertificate);
 
         // Act
         var response = await apimClient.GetAsync("protected/validate-using-context");
