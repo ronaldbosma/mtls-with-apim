@@ -94,8 +94,6 @@ public sealed class ProtectedApiTests
 
         // Assert
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
-
-        var content = await response.Content.ReadAsStringAsync();
         Assert.IsNotNull(response.ReasonPhrase);
         Assert.Contains("Client certificate missing", response.ReasonPhrase);
     }
