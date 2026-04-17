@@ -10,7 +10,7 @@ on:
         type: boolean
   pull_request:
     # Also trigger on ready_for_review to catch the transition from draft to ready state.
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [ opened, synchronize, reopened, ready_for_review ]
     branches:
       - main
     paths:
@@ -166,8 +166,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write # Required to fetch an OIDC token for Azure authentication
+      contents: read # Required to checkout code if needed
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v5
         with:
@@ -197,6 +201,7 @@ jobs:
           AZURE_API_MANAGEMENT_GATEWAY_URL: ${{ needs.deploy.outputs.AZURE_API_MANAGEMENT_GATEWAY_URL }}
           AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS: ${{ needs.deploy.outputs.AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS }}
           AZURE_KEY_VAULT_URI: ${{ needs.deploy.outputs.AZURE_KEY_VAULT_URI }}
+          DIRECTORY_WITH_CLIENT_CERTIFICATES: "./self-signed-certificates/certificates"
 
       - name: Upload Test Results
         if: always()
@@ -212,7 +217,7 @@ jobs:
 
   cleanup:
     name: Clean Up Resources
-    needs: [deploy, verify-deployment]
+    needs: [ deploy, verify-deployment ]
     if: ${{ success() && (github.event_name != 'workflow_dispatch' || github.event.inputs.cleanup-resources == 'true') }}
     runs-on: ubuntu-latest
     permissions:
