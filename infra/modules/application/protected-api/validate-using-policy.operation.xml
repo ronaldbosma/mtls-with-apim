@@ -7,7 +7,6 @@
                                      ignore-error="false">
             <identities>
                 <identity subject="CN=Client 01" issuer-subject="CN=APIM Sample DEV Intermediate CA" />
-                <identity subject="CN=Client 02" issuer-subject="CN=APIM Sample DEV Intermediate CA" />
             </identities>
         </validate-client-certificate>
 
