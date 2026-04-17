@@ -6,6 +6,10 @@
                                      validate-not-before="true" validate-not-after="true"
                                      ignore-error="false">
             <identities>
+				<!--
+					NOTE: When validate-certificate-chain is false, using only subject/issuer-subject matching is spoofable (a client can present a cert with the same DN strings). 
+					For a protected mTLS endpoint, consider validating by thumbprint so the check can't be bypassed by matching strings.
+				-->
                 <identity subject="CN=Client 01" issuer-subject="CN=APIM Sample DEV Intermediate CA" />
             </identities>
         </validate-client-certificate>
