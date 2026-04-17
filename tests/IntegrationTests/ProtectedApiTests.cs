@@ -40,6 +40,9 @@ public sealed class ProtectedTests
 
         // Assert
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+
+        var content = await response.Content.ReadAsStringAsync();
+        Assert.Contains("Client certificate missing", content);
     }
 
     [TestMethod]
@@ -55,6 +58,9 @@ public sealed class ProtectedTests
 
         // Assert
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+
+        var content = await response.Content.ReadAsStringAsync();
+        Assert.Contains("Invalid client certificate", content);
     }
 
     [TestMethod]
@@ -85,6 +91,10 @@ public sealed class ProtectedTests
 
         // Assert
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+
+        var content = await response.Content.ReadAsStringAsync();
+        Assert.IsNotNull(response.ReasonPhrase);
+        Assert.Contains("Client certificate missing", response.ReasonPhrase);
     }
 
     [TestMethod]
@@ -100,5 +110,7 @@ public sealed class ProtectedTests
 
         // Assert
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.IsNotNull(response.ReasonPhrase);
+        Assert.Contains("Invalid client certificate", response.ReasonPhrase);
     }
 }
