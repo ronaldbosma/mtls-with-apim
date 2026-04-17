@@ -201,7 +201,7 @@ jobs:
           AZURE_API_MANAGEMENT_GATEWAY_URL: ${{ needs.deploy.outputs.AZURE_API_MANAGEMENT_GATEWAY_URL }}
           AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS: ${{ needs.deploy.outputs.AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS }}
           AZURE_KEY_VAULT_URI: ${{ needs.deploy.outputs.AZURE_KEY_VAULT_URI }}
-          DIRECTORY_WITH_CLIENT_CERTIFICATES: "./self-signed-certificates/certificates"
+          DIRECTORY_WITH_CLIENT_CERTIFICATES: "${{ github.workspace }}/self-signed-certificates/certificates"
 
       - name: Upload Test Results
         if: always()
