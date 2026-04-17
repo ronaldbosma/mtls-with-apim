@@ -116,6 +116,8 @@ The pipeline consists of the following jobs:
 
   ![GitHub Actions Manual Trigger](images/github-actions-workflow-manual-trigger.png)
 
+See [GitHub Actions Workflow for Azure Developer CLI (azd) Templates](https://ronaldbosma.github.io/blog/2026/03/02/github-actions-workflow-for-azure-developer-cli-azd-templates/) for a detailed explanation of the workflow.
+
 ### Setting Up the Pipeline
 
 To set up the pipeline in your own repository, run the following command:
