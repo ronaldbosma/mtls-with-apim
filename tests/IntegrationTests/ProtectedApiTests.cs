@@ -16,6 +16,13 @@ public sealed class ProtectedApiTests
     private static readonly X509Certificate2 ValidClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/dev-client-01.pfx", "P@ssw0rd");
     private static readonly X509Certificate2 InvalidClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/tst-client-01.pfx", "P@ssw0rd");
 
+    [ClassCleanup]
+    public static void ClassCleanup()
+    {
+        ValidClientCertificate.Dispose();
+        InvalidClientCertificate.Dispose();
+    }
+
     [TestMethod]
     public async Task ValidateUsingPolicy_ValidClientCertificateProvided_200OkReturned()
     {
