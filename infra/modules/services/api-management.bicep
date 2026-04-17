@@ -31,6 +31,9 @@ param keyVaultName string
 // Variables
 //=============================================================================
 
+// Only the following tiers support uploading CA client certificates according to the documentation (see also: https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-ca-certificates):
+var tiersThatSupportCACertificates = ['Developer', 'Basic', 'Standard', 'Premium']
+
 var serviceTags { *: string } = union(tags, {
   'azd-service-name': 'apim'
 })
@@ -89,6 +92,19 @@ resource apiManagementService 'Microsoft.ApiManagement/service@2025-03-01-previe
     publisherEmail: publisherEmail
     customProperties: contains(apiManagementSettings.sku, 'Consumption') ? null : customProperties
     enableClientCertificate: true
+
+    certificates: contains(tiersThatSupportCACertificates, apiManagementSettings.sku)
+      ? [
+          {
+            encodedCertificate: loadTextContent('../../../self-signed-certificates/certificates/root-ca.without-markers.cer')
+            storeName: 'Root'
+          }
+          {
+            encodedCertificate: loadTextContent('../../../self-signed-certificates/certificates/dev-intermediate-ca.without-markers.cer')
+            storeName: 'CertificateAuthority'
+          }
+        ]
+      : null
   }
   identity: {
     type: 'SystemAssigned'
