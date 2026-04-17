@@ -3,11 +3,15 @@
         <base />
 
         <choose>
+            <when condition="@(context.Request.Certificate == null)">
+                <return-response>
+                    <set-status code="401" reason="Client certificate missing" />
+                </return-response>
+            </when>
             <when condition="@{
                 bool validateCertificateChain = {{validate-certificate-chain}};
 
-                return context.Request.Certificate == null ||
-                       (validateCertificateChain && !context.Request.Certificate.VerifyNoRevocation()) ||
+                return (validateCertificateChain && !context.Request.Certificate.VerifyNoRevocation()) ||
                        !context.Deployment.Certificates.Any(c => c.Value.Thumbprint == context.Request.Certificate.Thumbprint);
             }">
                 <return-response>
