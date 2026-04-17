@@ -3,11 +3,18 @@
         <base />
 
         <choose>
+			<!-- Return a 401 Unauthorized if no client certificate was provided -->
             <when condition="@(context.Request.Certificate == null)">
                 <return-response>
                     <set-status code="401" reason="Client certificate missing" />
                 </return-response>
             </when>
+			
+			<!--
+				Return a 401 Unauthorized
+				- if validate-certificate-chain is true but the client certificate or its chain is invalid
+				- or if the provided client certificate is not a known certificate in API Management that we trust
+			-->
             <when condition="@{
                 return ({{validate-certificate-chain}} && !context.Request.Certificate.VerifyNoRevocation()) ||
                        !context.Deployment.Certificates.Any(c => c.Value.Thumbprint == context.Request.Certificate.Thumbprint);
