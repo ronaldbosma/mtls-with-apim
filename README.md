@@ -76,7 +76,7 @@ azd down --purge
 
 ### Validate client certificate chain in Protected API
 
-By default, the Protected API does not validate the client certificate chain. This feature is not supported on v2 tier instances because they [do not support uploading CA certificates](https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-ca-certificates).
+By default, the Protected API does not validate the client certificate chain. This feature is not supported on v2 tier APIM instances because they [do not support uploading CA certificates](https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-ca-certificates).
 It can be enabled through the `validateCertificateChainInProtectedApi` parameter in [main.parameters.json](/infra/main.parameters.json).
 
 To enable it, run the following command before deploying the template:
