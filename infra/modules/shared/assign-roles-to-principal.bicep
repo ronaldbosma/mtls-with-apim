@@ -48,7 +48,7 @@ resource keyVault 'Microsoft.KeyVault/vaults@2025-05-01' existing = {
 // Assign role Application Insights to the principal
 
 resource assignAppInsightRolesToPrincipal 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(principalId, appInsights.id, roleDefinitions(monitoringMetricsPublisherRoleName).id)
+  name: guid(principalId, appInsights.id, monitoringMetricsPublisherRoleName)
   scope: appInsights
   properties: {
     #disable-next-line use-resource-id-functions
@@ -61,7 +61,7 @@ resource assignAppInsightRolesToPrincipal 'Microsoft.Authorization/roleAssignmen
 // Assign role on Key Vault to the principal
 
 resource assignRolesOnKeyVaultToPrincipal 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(principalId, keyVault.id, roleDefinitions(keyVaultRoleName).id)
+  name: guid(principalId, keyVault.id, keyVaultRoleName)
   scope: keyVault
   properties: {
     #disable-next-line use-resource-id-functions
