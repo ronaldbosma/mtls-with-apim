@@ -6,8 +6,11 @@ using IntegrationTests.Configuration;
 
 namespace IntegrationTests;
 
+/// <summary>
+/// Integration tests for the Protected API, which is configured to require client certificate authentication in APIM.
+/// </summary>
 [TestClass]
-public sealed class ProtectedTests
+public sealed class ProtectedApiTests
 {
     private static readonly X509Certificate2 ValidClientCertificate = X509CertificateLoader.LoadPkcs12FromFile(@"C:\repos\ronaldbosma\mtls-with-apim\self-signed-certificates\certificates\dev-client-01.pfx", "P@ssw0rd");
     private static readonly X509Certificate2 InvalidClientCertificate = X509CertificateLoader.LoadPkcs12FromFile(@"C:\repos\ronaldbosma\mtls-with-apim\self-signed-certificates\certificates\tst-client-01.pfx", "P@ssw0rd");
