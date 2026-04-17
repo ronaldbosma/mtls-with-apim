@@ -72,6 +72,20 @@ Once you're done and want to clean up, run the `azd down` command. By including 
 azd down --purge
 ```
 
+## Configuration
+
+### Validate client certificate chain in Protected API
+
+By default, the Protected API does not validate the client certificate chain. This feature is not supported on v2 tier APIM instances because they [do not support uploading CA certificates](https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-ca-certificates). If you enable it on a v2 tier APIM instance, requests that use the self-signed client certificates from this repository will always return `401 Unauthorized`, because APIM will try to validate the certificate chain but the CA chain is not available to APIM.
+
+It can be enabled through the `validateCertificateChainInProtectedApi` parameter in [main.parameters.json](/infra/main.parameters.json).
+
+To enable it, run the following command before deploying the template:
+
+```cmd
+azd env set VALIDATE_CERTIFICATE_CHAIN_IN_PROTECTED_API=true
+```
+
 ## Contents
 
 The repository consists of the following files and directories:
@@ -92,6 +106,7 @@ The repository consists of the following files and directories:
 │   ├── types                  [ Bicep user-defined types ]
 │   ├── main.bicep             [ Main infrastructure file ]
 │   └── main.parameters.json   [ Parameters file ]
+├── self-signed-certificates   [ Self-signed certificates used in mTLS scenarios ]
 ├── tests
 │   ├── IntegrationTests       [ Integration tests for automatically verifying different scenarios ]
 │   └── tests.http             [ HTTP requests to test the deployed resources ]

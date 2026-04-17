@@ -1,0 +1,7 @@
+{
+  "editor.formatOnSave": true,
+  "[xml]": {
+    "editor.formatOnSave": false
+  },
+  "yaml.format.printWidth": 250
+}

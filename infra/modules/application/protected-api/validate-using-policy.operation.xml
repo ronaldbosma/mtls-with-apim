@@ -1,0 +1,44 @@
+<policies>
+    <inbound>
+        <base />
+
+        <validate-client-certificate validate-revocation="false" validate-trust="{{validate-certificate-chain}}"
+                                     validate-not-before="true" validate-not-after="true"
+                                     ignore-error="false">
+            <identities>
+				<!--
+					NOTE: When validate-certificate-chain is false, using only subject/issuer-subject matching is spoofable (a client can present a cert with the same DN strings). 
+					For a protected mTLS endpoint, consider validating by thumbprint so the check can't be bypassed by matching strings.
+				-->
+                <identity subject="CN=Client 01" issuer-subject="CN=APIM Sample DEV Intermediate CA" />
+            </identities>
+        </validate-client-certificate>
+
+        <!-- Returns a 200 OK with the client certificate details in the body -->
+        <return-response>
+            <set-status code="200" />
+            <set-body>@(context.Request.Certificate.ToString())</set-body>
+        </return-response>
+    </inbound>
+
+    <backend>
+        <base />
+    </backend>
+
+    <outbound>
+        <base />
+    </outbound>
+
+    <on-error>
+        <set-header name="ErrorSource" exists-action="override">
+            <value>@(context.LastError.Source)</value>
+        </set-header>
+        <set-header name="ErrorReason" exists-action="override">
+            <value>@(context.LastError.Reason)</value>
+        </set-header>
+        <set-header name="ErrorMessage" exists-action="override">
+            <value>@(context.LastError.Message)</value>
+        </set-header>
+        <base />
+    </on-error>
+</policies>
