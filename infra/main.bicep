@@ -167,6 +167,16 @@ module protectedApi 'modules/application/protected-api/protected-api.bicep' = {
   ]
 }
 
+module unprotectedApi 'modules/application/unprotected-api/unprotected-api.bicep' = {
+  scope: resourceGroup
+  params: {
+    apiManagementServiceName: apiManagementSettings.serviceName
+  }
+  dependsOn: [
+    apiManagement
+  ]
+}
+
 //=============================================================================
 // Outputs
 //=============================================================================
