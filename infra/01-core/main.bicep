@@ -1,0 +1,99 @@
+//=============================================================================
+// mTLS with API Management - Core layer
+//=============================================================================
+
+targetScope = 'subscription'
+
+//=============================================================================
+// Imports
+//=============================================================================
+
+import { getResourceName, generateInstanceId } from '../99-shared/naming-conventions.bicep'
+import { getTemplateTags } from '../99-shared/helpers.bicep'
+import { appInsightsSettingsType } from '../99-shared/settings.bicep'
+
+//=============================================================================
+// Parameters
+//=============================================================================
+
+@minLength(1)
+@description('Location to use for all resources')
+param location string
+
+@minLength(1)
+@maxLength(32)
+@description('The name of the environment to deploy to')
+param environmentName string
+
+//=============================================================================
+// Variables
+//=============================================================================
+
+// Generate an instance ID to ensure unique resource names
+var instanceId string = generateInstanceId(environmentName, location)
+
+var resourceGroupName string = getResourceName('resourceGroup', environmentName, location, instanceId)
+
+var appInsightsSettings appInsightsSettingsType = {
+  appInsightsName: getResourceName('applicationInsights', environmentName, location, instanceId)
+  logAnalyticsWorkspaceName: getResourceName('logAnalyticsWorkspace', environmentName, location, instanceId)
+  retentionInDays: 30
+}
+
+var keyVaultName string = getResourceName('keyVault', environmentName, location, instanceId)
+
+var agwPublicIpAddressName string = getResourceName('publicIpAddress', environmentName, location, 'agw-${instanceId}')
+
+var tags { *: string } = getTemplateTags(environmentName)
+
+//=============================================================================
+// Resources
+//=============================================================================
+
+resource resourceGroup 'Microsoft.Resources/resourceGroups@2025-04-01' = {
+  name: resourceGroupName
+  location: location
+  tags: tags
+}
+
+module agwPublicIpAddress 'modules/public-ip-address.bicep' = {
+  scope: resourceGroup
+  params: {
+    location: location
+    tags: tags
+    publicIpAddressName: agwPublicIpAddressName
+  }
+}
+
+module appInsights 'modules/app-insights.bicep' = {
+  scope: resourceGroup
+  params: {
+    location: location
+    tags: tags
+    appInsightsSettings: appInsightsSettings
+  }
+}
+
+module keyVault 'modules/key-vault.bicep' = {
+  scope: resourceGroup
+  params: {
+    location: location
+    tags: tags
+    keyVaultName: keyVaultName
+  }
+}
+
+//=============================================================================
+// Outputs
+//=============================================================================
+
+// Return the names of the resources
+output AZURE_APPLICATION_INSIGHTS_NAME string = appInsightsSettings.appInsightsName
+output AZURE_KEY_VAULT_NAME string = keyVaultName
+output AZURE_LOG_ANALYTICS_WORKSPACE_NAME string = appInsightsSettings.logAnalyticsWorkspaceName
+output AZURE_RESOURCE_GROUP string = resourceGroupName
+
+// Return details of the public IP address for the Application Gateway
+output AGW_PUBLIC_IP_ADDRESS_NAME string = agwPublicIpAddressName
+output AGW_PUBLIC_IP_ADDRESS_ID string = agwPublicIpAddress.outputs.publicIpAddressId
+output AGW_PUBLIC_IP_ADDRESS_VALUE string = agwPublicIpAddress.outputs.publicIpAddressValue

@@ -23,7 +23,7 @@ param keyVaultName string
 // Resources
 //=============================================================================
 
-// Key Vault (see also: https://learn.microsoft.com/en-us/azure/key-vault/secrets/quick-create-bicep?tabs=CLI)
+// Key Vault
 
 resource keyVault 'Microsoft.KeyVault/vaults@2025-05-01' = {
   name: keyVaultName
