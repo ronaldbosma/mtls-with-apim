@@ -57,6 +57,7 @@ var applicationGatewaySettings applicationGatewaySettingsType = {
   publicIpAddressName: agwPublicIpAddressName
   wafPolicyName: getResourceName('webApplicationFirewallPolicy', environmentName, location, instanceId)
 }
+
 var virtualNetworkSettings virtualNetworkSettingsType = {
   virtualNetworkName: getResourceName('virtualNetwork', environmentName, location, instanceId)
   applicationGatewaySubnetName: getResourceName('subnet', environmentName, location, 'agw-${instanceId}')
