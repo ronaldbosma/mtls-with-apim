@@ -83,6 +83,16 @@ module keyVault 'modules/key-vault.bicep' = {
   }
 }
 
+module assignRolesToDeployer '../99-shared/assign-roles-to-principal.bicep' = {
+  scope: resourceGroup
+  params: {
+    principalId: deployer().objectId
+    isAdmin: true
+    appInsightsName: appInsightsSettings.appInsightsName
+    keyVaultName: keyVaultName
+  }
+}
+
 //=============================================================================
 // Outputs
 //=============================================================================
