@@ -3,5 +3,9 @@
 name: mtls-with-apim
 metadata:
   template: mtls-with-apim@0.0.0
+infra:
+  layers:
+    - name: core
+      path: ./infra/01-core
 requiredVersions:
   azd: ">= 1.23.15" # azd version 1.23.15 or higher is required because we're using features from Bicep 0.42.1.
