@@ -78,12 +78,18 @@ azd down --purge
 
 By default, the Protected API does not validate the client certificate chain. This feature is not supported on v2 tier APIM instances because they [do not support uploading CA certificates](https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-ca-certificates). If you enable it on a v2 tier APIM instance, requests that use the self-signed client certificates from this repository will always return `401 Unauthorized`, because APIM will try to validate the certificate chain but the CA chain is not available to APIM.
 
-It can be enabled through the `validateCertificateChainInProtectedApi` parameter in [main.parameters.json](/infra/main.parameters.json).
+It can be enabled through the `validateCertificateChainInProtectedApi` parameter in [main.parameters.json](/infra/03-application/main.parameters.json).
 
 To enable it, run the following command before deploying the template:
 
 ```cmd
 azd env set VALIDATE_CERTIFICATE_CHAIN_IN_PROTECTED_API=true
+```
+
+If you have already deployed the template, you only have to redeploy the application layer to apply the change: 
+
+```cmd
+azd provision application
 ```
 
 ## Contents
