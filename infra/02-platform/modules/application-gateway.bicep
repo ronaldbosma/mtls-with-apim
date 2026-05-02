@@ -6,8 +6,8 @@
 // Imports
 //=============================================================================
 
-import { applicationGatewaySettingsType, appInsightsSettingsType } from '../../types/settings.bicep'
-import { getApiManagementFqdn } from '../../functions/helpers.bicep'
+import { applicationGatewaySettingsType } from '../../99-shared/settings.bicep'
+import { getApiManagementFqdn } from '../../99-shared/helpers.bicep'
 
 //=============================================================================
 // Parameters
@@ -28,15 +28,15 @@ param subnetId string
 @description('The name of the API Management Service to use')
 param apiManagementServiceName string
 
-@description('The settings for App Insights')
-param appInsightsSettings appInsightsSettingsType
+@description('The name of the Log Analytics workspace to use')
+param logAnalyticsWorkspaceName string
 
 //=============================================================================
 // Existing Resources
 //=============================================================================
 
 resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2025-07-01' existing = {
-  name: appInsightsSettings.logAnalyticsWorkspaceName
+  name: logAnalyticsWorkspaceName
 }
 
 //=============================================================================
@@ -116,10 +116,18 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2024-10-01' =
           protocol: 'Http'
           // requireServerNameIndication: false
           frontendIPConfiguration: {
-            id: resourceId('Microsoft.Network/applicationGateways/frontendIPConfigurations', applicationGatewaySettings.applicationGatewayName, 'agw-public-frontend-ip')
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/frontendIPConfigurations',
+              applicationGatewaySettings.applicationGatewayName,
+              'agw-public-frontend-ip'
+            )
           }
           frontendPort: {
-            id: resourceId('Microsoft.Network/applicationGateways/frontendPorts', applicationGatewaySettings.applicationGatewayName, 'port-http')
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/frontendPorts',
+              applicationGatewaySettings.applicationGatewayName,
+              'port-http'
+            )
           }
         }
       }
@@ -169,7 +177,11 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2024-10-01' =
           hostName: '${apiManagementServiceName}.azure-api.net'
           requestTimeout: 20
           probe: {
-            id: resourceId('Microsoft.Network/applicationGateways/probes', applicationGatewaySettings.applicationGatewayName, 'apim-gateway-probe')
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/probes',
+              applicationGatewaySettings.applicationGatewayName,
+              'apim-gateway-probe'
+            )
           }
         }
       }
@@ -184,13 +196,25 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2024-10-01' =
           priority: 10
           ruleType: 'Basic'
           httpListener: {
-            id: resourceId('Microsoft.Network/applicationGateways/httpListeners', applicationGatewaySettings.applicationGatewayName, 'http-listener')
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/httpListeners',
+              applicationGatewaySettings.applicationGatewayName,
+              'http-listener'
+            )
           }
           backendAddressPool: {
-            id: resourceId('Microsoft.Network/applicationGateways/backendAddressPools', applicationGatewaySettings.applicationGatewayName, 'apim-gateway-backend-pool')
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/backendAddressPools',
+              applicationGatewaySettings.applicationGatewayName,
+              'apim-gateway-backend-pool'
+            )
           }
           backendHttpSettings: {
-            id: resourceId('Microsoft.Network/applicationGateways/backendHttpSettingsCollection', applicationGatewaySettings.applicationGatewayName, 'apim-gateway-backend-settings')
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/backendHttpSettingsCollection',
+              applicationGatewaySettings.applicationGatewayName,
+              'apim-gateway-backend-settings'
+            )
           }
         }
       }

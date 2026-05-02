@@ -40,7 +40,7 @@ resource devClient01Certificate 'Microsoft.ApiManagement/service/certificates@20
   name: 'dev-client-01'
   parent: apiManagementService
   properties: {
-    data: loadTextContent('../../../../self-signed-certificates/certificates/dev-client-01.without-markers.cer')
+    data: loadTextContent('../../../self-signed-certificates/certificates/dev-client-01.without-markers.cer')
   }
 }
 

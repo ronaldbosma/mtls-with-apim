@@ -76,15 +76,39 @@ jobs:
 
       - name: Bicep Lint
         run: |
-          az bicep lint --file ./infra/main.bicep
+          az bicep lint --file ./infra/01-core/main.bicep
+          az bicep lint --file ./infra/02-platform/main.bicep
+          az bicep lint --file ./infra/03-application/main.bicep
 
-      - name: Validate Template
-        run: |
+      - name: Validate Core Layer Template
+        run: |+
           az deployment sub validate `
-            --template-file './infra/main.bicep' `
+            --template-file './infra/01-core/main.bicep' `
+            --location $env:AZURE_LOCATION `
+            --parameters environmentName=$env:AZURE_ENV_NAME `
+                         location=$env:AZURE_LOCATION
+
+      - name: Validate Platform Layer Template
+        run: |+
+          az deployment sub validate `
+            --template-file './infra/02-platform/main.bicep' `
             --location $env:AZURE_LOCATION `
             --parameters environmentName=$env:AZURE_ENV_NAME `
                          location=$env:AZURE_LOCATION `
+                         instanceId='sample' `
+                         resourceGroupName='sample' `
+                         agwPublicIpAddressName='sample' `
+                         appInsightsName='sample' `
+                         keyVaultName='sample' `
+                         logAnalyticsWorkspaceName='sample'
+
+      - name: Validate Application Layer Template
+        run: |
+          az deployment sub validate `
+            --template-file './infra/03-application/main.bicep' `
+            --location $env:AZURE_LOCATION `
+            --parameters resourceGroupName='sample' `
+                         apiManagementServiceName='sample' `
                          validateCertificateChainInProtectedApi=false
 
       - name: Create artifacts folder
@@ -118,7 +142,7 @@ jobs:
 
     outputs:
       AZURE_API_MANAGEMENT_GATEWAY_URL: ${{ steps.get-outputs.outputs.AZURE_API_MANAGEMENT_GATEWAY_URL }}
-      AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS: ${{ steps.get-outputs.outputs.AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS }}
+      AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_VALUE: ${{ steps.get-outputs.outputs.AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_VALUE }}
       AZURE_KEY_VAULT_URI: ${{ steps.get-outputs.outputs.AZURE_KEY_VAULT_URI }}
 
     steps:
@@ -151,7 +175,7 @@ jobs:
         run: |
           $variableNames = @(
             "AZURE_API_MANAGEMENT_GATEWAY_URL",
-            "AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS",
+            "AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_VALUE",
             "AZURE_KEY_VAULT_URI"
           )
           .\.github\workflows\scripts\export-azd-env-variables.ps1 -VariableNames $variableNames
@@ -199,7 +223,7 @@ jobs:
         env:
           # Pass the necessary deployed resource properties as environment variables so the integration tests can access them.
           AZURE_API_MANAGEMENT_GATEWAY_URL: ${{ needs.deploy.outputs.AZURE_API_MANAGEMENT_GATEWAY_URL }}
-          AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS: ${{ needs.deploy.outputs.AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS }}
+          AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_VALUE: ${{ needs.deploy.outputs.AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_VALUE }}
           AZURE_KEY_VAULT_URI: ${{ needs.deploy.outputs.AZURE_KEY_VAULT_URI }}
           DIRECTORY_WITH_CLIENT_CERTIFICATES: "${{ github.workspace }}/self-signed-certificates/certificates"
 
