@@ -108,4 +108,4 @@ output AZURE_RESOURCE_GROUP string = resourceGroupName
 
 // Return details of the public IP address for the Application Gateway
 output AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_NAME string = agwPublicIpAddressName
-output AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_VALUE string = agwPublicIpAddress.outputs.publicIpAddressValue
+output AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_VALUE string = agwPublicIpAddress.outputs.ipAddress

@@ -37,5 +37,4 @@ resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2024-10-01' = {
 // Outputs
 //=============================================================================
 
-output publicIpAddressId string = publicIPAddress.id
-output publicIpAddressValue string = publicIPAddress.properties.ipAddress
+output ipAddress string = publicIPAddress.properties.ipAddress
