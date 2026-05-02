@@ -1,0 +1,30 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "environmentName": {
+      "value": "${AZURE_ENV_NAME}"
+    },
+    "location": {
+      "value": "${AZURE_LOCATION}"
+    },
+    "instanceId": {
+      "value": "${AZURE_ENV_INSTANCE_ID}"
+    },
+    "resourceGroupName": {
+      "value": "${AZURE_RESOURCE_GROUP}"
+    },
+    "agwPublicIpAddressName": {
+      "value": "${AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_NAME}"
+    },
+    "appInsightsName": {
+      "value": "${AZURE_APPLICATION_INSIGHTS_NAME}"
+    },
+    "keyVaultName": {
+      "value": "${AZURE_KEY_VAULT_NAME}"
+    },
+    "logAnalyticsWorkspaceName": {
+      "value": "${AZURE_LOG_ANALYTICS_WORKSPACE_NAME}"
+    }
+  }
+}
