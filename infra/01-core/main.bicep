@@ -91,6 +91,10 @@ module assignRolesToDeployer '../99-shared/assign-roles-to-principal.bicep' = {
     appInsightsName: appInsightsSettings.appInsightsName
     keyVaultName: keyVaultName
   }
+  dependsOn: [
+    appInsights
+    keyVault
+  ]
 }
 
 //=============================================================================

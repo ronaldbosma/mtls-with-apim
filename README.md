@@ -107,7 +107,7 @@ The repository consists of the following files and directories:
 │   ├── 01-core                [ Core layer that deploys App Insights, Key Vault, etc. ]
 │   ├── 02-platform            [ Platform layer that deploys VNet, Application Gateway and API Management ]
 │   ├── 03-application         [ Application layer that deploys application infrastructure resources ]
-│   └── 99-shared              [ Resuable modules, user-defined functions and user-defined types ]
+│   └── 99-shared              [ Reusable modules, user-defined functions and user-defined types ]
 ├── self-signed-certificates   [ Self-signed certificates used in mTLS scenarios ]
 ├── tests
 │   ├── IntegrationTests       [ Integration tests for automatically verifying different scenarios ]
