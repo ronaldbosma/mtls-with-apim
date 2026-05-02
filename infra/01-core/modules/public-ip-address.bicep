@@ -13,7 +13,6 @@ param location string
 param tags object
 
 @description('The name of the Public IP Address')
-@maxLength(24)
 param publicIpAddressName string
 
 //=============================================================================
