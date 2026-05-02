@@ -34,6 +34,8 @@ var instanceId string = generateInstanceId(environmentName, location)
 
 var resourceGroupName string = getResourceName('resourceGroup', environmentName, location, instanceId)
 
+var agwPublicIpAddressName string = getResourceName('publicIpAddress', environmentName, location, 'agw-${instanceId}')
+
 var appInsightsSettings appInsightsSettingsType = {
   appInsightsName: getResourceName('applicationInsights', environmentName, location, instanceId)
   logAnalyticsWorkspaceName: getResourceName('logAnalyticsWorkspace', environmentName, location, instanceId)
@@ -41,8 +43,6 @@ var appInsightsSettings appInsightsSettingsType = {
 }
 
 var keyVaultName string = getResourceName('keyVault', environmentName, location, instanceId)
-
-var agwPublicIpAddressName string = getResourceName('publicIpAddress', environmentName, location, 'agw-${instanceId}')
 
 var tags { *: string } = getTemplateTags(environmentName)
 
