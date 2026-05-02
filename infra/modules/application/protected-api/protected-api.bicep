@@ -60,7 +60,7 @@ resource protectedApi 'Microsoft.ApiManagement/service/apis@2025-03-01-preview' 
 }
 
 // Operation to validate client certificate using validate-client-certificate policy
-resource validateUsingPolicy 'Microsoft.ApiManagement/service/apis/operations@2025-03-01-preview' = {
+resource validateUsingPolicyOperation 'Microsoft.ApiManagement/service/apis/operations@2025-03-01-preview' = {
   name: 'validate-using-policy'
   parent: protectedApi
   properties: {
@@ -83,7 +83,7 @@ resource validateUsingPolicy 'Microsoft.ApiManagement/service/apis/operations@20
 }
 
 // Operation to validate client certificate using context.Request.Certificate property
-resource validateUsingContext 'Microsoft.ApiManagement/service/apis/operations@2025-03-01-preview' = {
+resource validateUsingContextOperation 'Microsoft.ApiManagement/service/apis/operations@2025-03-01-preview' = {
   name: 'validate-using-context'
   parent: protectedApi
   properties: {
