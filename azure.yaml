@@ -7,5 +7,7 @@ infra:
   layers:
     - name: core
       path: ./infra/01-core
+    - name: platform
+      path: ./infra/02-platform
 requiredVersions:
   azd: ">= 1.23.15" # azd version 1.23.15 or higher is required because we're using features from Bicep 0.42.1.

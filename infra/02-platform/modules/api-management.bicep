@@ -6,7 +6,7 @@
 // Imports
 //=============================================================================
 
-import { apiManagementSettingsType, appInsightsSettingsType } from '../../types/settings.bicep'
+import { apiManagementSettingsType } from '../../99-shared/settings.bicep'
 
 //=============================================================================
 // Parameters
@@ -21,8 +21,8 @@ param tags object
 @description('The settings for the API Management Service that will be created')
 param apiManagementSettings apiManagementSettingsType
 
-@description('The settings for App Insights')
-param appInsightsSettings appInsightsSettingsType
+@description('The name of the App Insights instance to use')
+param appInsightsName string
 
 @description('The name of the Key Vault that will contain the secrets')
 param keyVaultName string
@@ -65,7 +65,7 @@ var customProperties resourceInput<'Microsoft.ApiManagement/service@2025-03-01-p
 //=============================================================================
 
 resource appInsights 'Microsoft.Insights/components@2020-02-02' existing = {
-  name: appInsightsSettings.appInsightsName
+  name: appInsightsName
 }
 
 #disable-next-line no-unused-existing-resources
@@ -113,11 +113,11 @@ resource apiManagementService 'Microsoft.ApiManagement/service@2025-03-01-previe
 
 // Assign roles to system-assigned identity of API Management
 
-module assignRolesToApimSystemAssignedIdentity '../shared/assign-roles-to-principal.bicep' = {
+module assignRolesToApimSystemAssignedIdentity '../../99-shared/assign-roles-to-principal.bicep' = {
   params: {
     principalId: apiManagementService.identity.principalId
     principalType: 'ServicePrincipal'
-    appInsightsName: appInsightsSettings.appInsightsName
+    appInsightsName: appInsightsName
     keyVaultName: keyVaultName
   }
 }
@@ -138,7 +138,7 @@ resource appInsightsConnectionStringNamedValue 'Microsoft.ApiManagement/service/
 // - we need diagnostics settings that specify what to log to the logger
 
 resource apimAppInsightsLogger 'Microsoft.ApiManagement/service/loggers@2025-03-01-preview' = {
-  name: appInsightsSettings.appInsightsName
+  name: appInsightsName
   parent: apiManagementService
   properties: {
     loggerType: 'applicationInsights'

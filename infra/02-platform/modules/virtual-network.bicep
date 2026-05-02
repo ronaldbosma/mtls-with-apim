@@ -6,7 +6,7 @@
 // Imports
 //=============================================================================
 
-import { virtualNetworkSettingsType } from '../../types/settings.bicep'
+import { virtualNetworkSettingsType } from '../../99-shared/settings.bicep'
 
 //=============================================================================
 // Parameters
