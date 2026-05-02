@@ -98,14 +98,10 @@ The repository consists of the following files and directories:
 ├── demos                      [ Demo guide(s) ]
 ├── images                     [ Images used in the README ]
 ├── infra                      [ Infrastructure As Code files ]
-│   ├── functions              [ Bicep user-defined functions ]
-│   ├── modules
-│   │   ├── application        [ Modules for application infrastructure resources ]
-│   │   ├── services           [ Modules for all Azure services ]
-│   │   └── shared             [ Reusable modules ]
-│   ├── types                  [ Bicep user-defined types ]
-│   ├── main.bicep             [ Main infrastructure file ]
-│   └── main.parameters.json   [ Parameters file ]
+│   ├── 01-core                [ Core layer that deploys App Insights, Key Vault, etc. ]
+│   ├── 02-platform            [ Platform layer that deploys VNet, Application Gateway and API Management ]
+│   ├── 03-application         [ Application layer that deploys application infrastructure resources ]
+│   └── 99-shared              [ Resuable modules, user-defined functions and user-defined types ]
 ├── self-signed-certificates   [ Self-signed certificates used in mTLS scenarios ]
 ├── tests
 │   ├── IntegrationTests       [ Integration tests for automatically verifying different scenarios ]
