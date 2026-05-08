@@ -8,6 +8,9 @@
     "apiManagementServiceName": {
       "value": "${AZURE_API_MANAGEMENT_NAME}"
     },
+    "keyVaultName": {
+      "value": "${AZURE_KEY_VAULT_NAME}"
+    },
     "validateCertificateChainInProtectedApi": {
       "value": "${VALIDATE_CERTIFICATE_CHAIN_IN_PROTECTED_API=false}"
     }

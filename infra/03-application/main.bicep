@@ -14,6 +14,9 @@ param resourceGroupName string
 @description('The name of the API Management service')
 param apiManagementServiceName string
 
+@description('The name of the Key Vault that contains the secrets and certificates')
+param keyVaultName string
+
 @description('Indicates whether the Protected API should validate the certificate chain of the client certificate.')
 param validateCertificateChainInProtectedApi bool
 
@@ -41,6 +44,7 @@ module unprotectedApi 'unprotected-api/unprotected-api.bicep' = {
   scope: resourceGroup
   params: {
     apiManagementServiceName: apiManagementServiceName
+    keyVaultName: keyVaultName
   }
 }
 
