@@ -196,3 +196,23 @@ Use the [az apim deletedservice list](https://learn.microsoft.com/en-us/cli/azur
 ```cmd
 az apim deletedservice purge --location "norwayeast" --service-name "apim-mtlsapim-nwe-kt2tx"
 ```
+
+### The specified PKCS#12 X.509 certificate content can not be read. Please check if certificate is in valid PKCS#12 format.
+
+If you've regenerated the certificate tree with your own password, you might get the following error indicating that the import of a certificate fails.
+
+```
+(BadParameter) The specified PKCS#12 X.509 certificate content can not be read. Please check if certificate is in valid PKCS#12 format.
+Code: BadParameter
+Message: The specified PKCS#12 X.509 certificate content can not be read. Please check if certificate is in valid PKCS#12 format.
+Exception: ...\infra\01-core\hooks\core-postprovision-import-certificates.ps1:50:5
+Line |
+  50 |      throw "Failed to import certificate 'dev-unprotected-api' into Ke …
+     |      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Failed to import certificate 'dev-unprotected-api' into Key Vault 'kvmtlsapimsdcj767o'.
+
+ERROR: deployment failed: layer 'core': failed running post hooks: 'postprovision' hook failed with exit code: '1', 
+       Path: '...\infra\01-core\hooks\core-postprovision-import-certificates.ps1'. : exit code: 1
+```
+
+Change the password in [./infra/01-core/hooks/core-postprovision-import-certificates.ps1](./infra/01-core/hooks/core-postprovision-import-certificates.ps1) to successfully import the certificate(s).

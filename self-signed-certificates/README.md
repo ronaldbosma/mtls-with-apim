@@ -13,3 +13,5 @@ The script [generate-client-certificates.ps1](./generate-client-certificates.ps1
 ![self-signed certificates](../images/diagrams-self-signed-certificates.png)
 
 See the [certificates](./certificates) folder for the generated certificates. The `.pfx` files are password protected with the password `P@ssw0rd`. They are valid until `May 8th, 2076`, except for the Expired certificate.
+
+If you generate the certificate tree with a different password, make sure to update [/infra/01-core/hooks/core-postprovision-import-certificates.ps1](../infra/01-core/hooks/core-postprovision-import-certificates.ps1).
