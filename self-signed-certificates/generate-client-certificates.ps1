@@ -30,6 +30,7 @@ $certificateTree = @{
                 @{ Subject = "CN=Client 02"; Id = "dev-client-02"; DnsName = "Client 02"; ExpiresInMonths = $CertificateExpirationInMonths },
                 @{ Subject = "CN=Unprotected API"; Id = "dev-unprotected-api"; DnsName = "Unprotected API"; ExpiresInMonths = $CertificateExpirationInMonths },
                 @{ Subject = "CN=Integration Tests"; Id = "dev-integration-tests"; DnsName = "Integration Tests"; ExpiresInMonths = $CertificateExpirationInMonths },
+                # We can't actually create an expired certificate, but we can set the expiration date to the current date so it expires tomorrow
                 @{ Subject = "CN=Expired"; Id = "dev-expired"; DnsName = "Expired"; ExpiresInMonths = 0 }
             )
         },
