@@ -216,3 +216,17 @@ ERROR: deployment failed: layer 'core': failed running post hooks: 'postprovisio
 ```
 
 Change the password in [./infra/01-core/hooks/core-postprovision-import-certificates.ps1](./infra/01-core/hooks/core-postprovision-import-certificates.ps1) to successfully import the certificate(s).
+
+### Invalid certificate data. Certificate data should contain a valid Base64Encoded string
+
+When deploying API Management and supplying certificate data, you might see this error:
+
+```
+deployment failed: error deploying infrastructure: deploying to subscription: 
+
+Deployment Error Details:
+ValidationError: Invalid certificate data.  Certificate data should contain a valid Base64Encoded string
+```
+
+This usually happens when certificate content is provided in PEM form (with `-----BEGIN CERTIFICATE-----` and `-----END CERTIFICATE-----` lines) instead of plain base64 certificate data.
+Use certificate data without PEM markers, or use the generated `<name>.without-markers.cer` file created by the provided PowerShell script.
