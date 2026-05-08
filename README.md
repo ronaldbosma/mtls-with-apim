@@ -57,6 +57,12 @@ Once the prerequisites are installed on your machine, you can deploy this templa
    azd auth login
    ```
 
+1. Run the `az login` command to authenticate to your Azure subscription using the **Azure CLI** _(if you haven't already)_. This is required for the [hooks](#hooks) to function properly. Make sure to log into the same tenant as the Azure Developer CLI.
+
+   ```cmd
+   az login
+   ```
+
 1. Run the `azd up` command to provision the resources in your Azure subscription.
 
    ```cmd
@@ -122,6 +128,17 @@ The repository consists of the following files and directories:
 ├── azure.yaml                 [ Describes the apps and types of Azure resources ]
 └── bicepconfig.json           [ Bicep configuration file ]
 ```
+
+## Hooks
+
+This template has several hooks that are executed at different stages of the deployment process. The following hooks are included:
+
+### Post-provision hooks - Core layer
+
+These PowerShell scripts are executed after the the core layer is provisioned.
+
+- [core-postprovision-import-certificates.ps1](infra/01-core/hooks/core-postprovision-import-certificates.ps1):  
+  This script imports the necessary certificates into Key Vault.
 
 ## Pipeline
 
