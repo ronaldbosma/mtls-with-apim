@@ -15,6 +15,7 @@ public sealed class ProtectedApiTests
     private static readonly TestConfiguration Config = TestConfiguration.Load();
     private static readonly X509Certificate2 ValidClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/dev-integration-tests.pfx", "P@ssw0rd");
     private static readonly X509Certificate2 InvalidClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/tst-client-01.pfx", "P@ssw0rd");
+    private static readonly X509Certificate2 ExpiredClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/dev-expired.pfx", "P@ssw0rd");
 
     [ClassCleanup]
     public static void ClassCleanup()
@@ -69,6 +70,22 @@ public sealed class ProtectedApiTests
     }
 
     [TestMethod]
+    public async Task ValidateUsingPolicy_ExpiredClientCertificateProvided_401UnauthorizedReturned()
+    {
+        // Arrange
+        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, ExpiredClientCertificate);
+
+        // Act
+        var response = await apimClient.GetAsync("protected/validate-using-policy");
+
+        // Assert
+        Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+
+        var content = await response.Content.ReadAsStringAsync();
+        Assert.Contains("Invalid client certificate", content);
+    }
+
+    [TestMethod]
     public async Task ValidateUsingContext_ValidClientCertificateProvided_200OkReturned()
     {
         // Arrange
@@ -101,6 +118,21 @@ public sealed class ProtectedApiTests
     {
         // Arrange
         using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, InvalidClientCertificate);
+
+        // Act
+        var response = await apimClient.GetAsync("protected/validate-using-context");
+
+        // Assert
+        Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.IsNotNull(response.ReasonPhrase);
+        Assert.Contains("Invalid client certificate", response.ReasonPhrase);
+    }
+
+    [TestMethod]
+    public async Task ValidateUsingContext_ExpiredClientCertificateProvided_401UnauthorizedReturned()
+    {
+        // Arrange
+        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, ExpiredClientCertificate);
 
         // Act
         var response = await apimClient.GetAsync("protected/validate-using-context");
