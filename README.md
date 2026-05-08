@@ -230,3 +230,21 @@ ValidationError: Invalid certificate data.  Certificate data should contain a va
 
 This usually happens when certificate content is provided in PEM form (with `-----BEGIN CERTIFICATE-----` and `-----END CERTIFICATE-----` lines) instead of plain base64 certificate data.
 Use certificate data without PEM markers, or use the generated `<name>.without-markers.cer` file created by the provided PowerShell script.
+
+### Certificate with id 'client-certificate' does not contain private key
+
+The following error can occur during deployment when a referenced Key Vault certificate does not have an exportable private key.
+
+```
+deployment failed: error deploying infrastructure: deploying to subscription: 
+
+Deployment Error Details:
+ValidationError: One or more fields contain incorrect values:
+ValidationError: Certificate with id 'client-certificate' does not contain private key.
+```
+
+When creating or importing certificates in Key Vault, it is generally safer to make the private key non-exportable. However, for certificates referenced by API Management, the private key must be exportable.
+
+This is typically not an issue when uploading a `.pfx` directly because the private key will be exportable, but it can fail when the certificate is generated in Key Vault with **Exportable Private Key** set to `false`.
+
+To fix this, regenerate the certificate with **Exportable Private Key** set to `true`, then redeploy.
