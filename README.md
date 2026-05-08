@@ -6,6 +6,13 @@
 
 > TODO intro
 
+> [!WARNING]  
+> This repository intentionally includes self-signed certificates (including private keys) **for local development and demo/template convenience only**.
+> In real-world scenarios, **never** commit certificates with private keys to source control.
+> Use proper secret/certificate management and generate certificates as part of your secure environment/tooling.
+> We included these files here to keep this template easy to use without adding an extra dependency on certificate generation tools (for example, OpenSSL).
+
+
 > [!IMPORTANT]  
 > This template is not production-ready; it uses minimal cost SKUs and omits network isolation, advanced security, governance and resiliency. Harden security, implement enterprise controls and/or replace modules with [Azure Verified Modules](https://azure.github.io/Azure-Verified-Modules/) before any production use.
 
@@ -48,6 +55,12 @@ Once the prerequisites are installed on your machine, you can deploy this templa
 
    ```cmd
    azd auth login
+   ```
+
+1. Run the `az login` command to authenticate to your Azure subscription using the **Azure CLI** _(if you haven't already)_. This is required for the [hooks](#hooks) to function properly. Make sure to log into the same tenant as the Azure Developer CLI.
+
+   ```cmd
+   az login
    ```
 
 1. Run the `azd up` command to provision the resources in your Azure subscription.
@@ -115,6 +128,17 @@ The repository consists of the following files and directories:
 ├── azure.yaml                 [ Describes the apps and types of Azure resources ]
 └── bicepconfig.json           [ Bicep configuration file ]
 ```
+
+## Hooks
+
+This template has several hooks that are executed at different stages of the deployment process. The following hooks are included:
+
+### Post-provision hooks - Core layer
+
+These PowerShell scripts are executed after the the core layer is provisioned.
+
+- [core-postprovision-import-certificates.ps1](infra/01-core/hooks/core-postprovision-import-certificates.ps1):  
+  This script imports the necessary certificates into Key Vault.
 
 ## Pipeline
 
@@ -189,3 +213,55 @@ Use the [az apim deletedservice list](https://learn.microsoft.com/en-us/cli/azur
 ```cmd
 az apim deletedservice purge --location "norwayeast" --service-name "apim-mtlsapim-nwe-kt2tx"
 ```
+
+### The specified PKCS#12 X.509 certificate content can not be read. Please check if certificate is in valid PKCS#12 format.
+
+If you've regenerated the certificate tree with your own password, you might get the following error indicating that the import of a certificate fails.
+
+```
+(BadParameter) The specified PKCS#12 X.509 certificate content can not be read. Please check if certificate is in valid PKCS#12 format.
+Code: BadParameter
+Message: The specified PKCS#12 X.509 certificate content can not be read. Please check if certificate is in valid PKCS#12 format.
+Exception: ...\infra\01-core\hooks\core-postprovision-import-certificates.ps1:50:5
+Line |
+  50 |      throw "Failed to import certificate 'dev-unprotected-api' into Ke …
+     |      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | Failed to import certificate 'dev-unprotected-api' into Key Vault 'kvmtlsapimsdcj767o'.
+
+ERROR: deployment failed: layer 'core': failed running post hooks: 'postprovision' hook failed with exit code: '1', 
+       Path: '...\infra\01-core\hooks\core-postprovision-import-certificates.ps1'. : exit code: 1
+```
+
+Change the password in [./infra/01-core/hooks/core-postprovision-import-certificates.ps1](./infra/01-core/hooks/core-postprovision-import-certificates.ps1) to successfully import the certificate(s).
+
+### Invalid certificate data. Certificate data should contain a valid Base64Encoded string
+
+When deploying API Management and supplying certificate data, you might see this error:
+
+```
+deployment failed: error deploying infrastructure: deploying to subscription: 
+
+Deployment Error Details:
+ValidationError: Invalid certificate data.  Certificate data should contain a valid Base64Encoded string
+```
+
+This usually happens when certificate content is provided in PEM form (with `-----BEGIN CERTIFICATE-----` and `-----END CERTIFICATE-----` lines) instead of plain base64 certificate data.
+Use certificate data without PEM markers, or use the generated `<name>.without-markers.cer` file created by the provided PowerShell script.
+
+### Certificate with id 'client-certificate' does not contain private key
+
+The following error can occur during deployment when a referenced Key Vault certificate does not have an exportable private key.
+
+```
+deployment failed: error deploying infrastructure: deploying to subscription: 
+
+Deployment Error Details:
+ValidationError: One or more fields contain incorrect values:
+ValidationError: Certificate with id 'client-certificate' does not contain private key.
+```
+
+When creating or importing certificates in Key Vault, it is generally safer to make the private key non-exportable. However, for certificates referenced by API Management, the private key must be exportable.
+
+This is typically not an issue when uploading a `.pfx` directly because the private key will be exportable, but it can fail when the certificate is generated in Key Vault with **Exportable Private Key** set to `false`.
+
+To fix this, regenerate the certificate with **Exportable Private Key** set to `true`, then redeploy.

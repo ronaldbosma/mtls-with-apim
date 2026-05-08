@@ -1,3 +1,9 @@
+param(
+    [Parameter(Mandatory = $true)][SecureString]$CertificatePassword,
+    [int]$CertificateExpirationInMonths = 600
+)
+
+
 # =====================================================================
 # Settings
 # =====================================================================
@@ -6,12 +12,39 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
 
-$certificateExpirationInMonths = 600 # 600 months == 50 years
-
-
 $currentScriptPath = $MyInvocation.MyCommand.Path | Split-Path -Parent
 $exportPath = "$currentScriptPath/certificates"
-$certificatePassword = ConvertTo-SecureString -String 'P@ssw0rd' -Force -AsPlainText
+
+
+$certificateTree = @{
+    Subject         = "CN=APIM Sample Root CA"
+    Id              = "root-ca"
+    ExpiresInMonths = $CertificateExpirationInMonths
+    Intermediates   = @(
+        @{
+            Subject         = "CN=APIM Sample DEV Intermediate CA"
+            Id              = "dev-intermediate-ca"
+            ExpiresInMonths = $CertificateExpirationInMonths
+            Clients         = @(
+                @{ Subject = "CN=Client 01"; Id = "dev-client-01"; DnsName = "Client 01"; ExpiresInMonths = $CertificateExpirationInMonths },
+                @{ Subject = "CN=Client 02"; Id = "dev-client-02"; DnsName = "Client 02"; ExpiresInMonths = $CertificateExpirationInMonths },
+                @{ Subject = "CN=Unprotected API"; Id = "dev-unprotected-api"; DnsName = "Unprotected API"; ExpiresInMonths = $CertificateExpirationInMonths },
+                @{ Subject = "CN=Integration Tests"; Id = "dev-integration-tests"; DnsName = "Integration Tests"; ExpiresInMonths = $CertificateExpirationInMonths },
+                # We can't actually create an expired certificate, but we can set the expiration date to the current date so it expires tomorrow
+                @{ Subject = "CN=Expired"; Id = "dev-expired"; DnsName = "Expired"; ExpiresInMonths = 0 }
+            )
+        },
+        @{
+            Subject         = "CN=APIM Sample TST Intermediate CA"
+            Id              = "tst-intermediate-ca"
+            ExpiresInMonths = $CertificateExpirationInMonths
+            Clients         = @(
+                @{ Subject = "CN=Client 01"; Id = "tst-client-01"; DnsName = "Client 01"; ExpiresInMonths = $CertificateExpirationInMonths },
+                @{ Subject = "CN=Client 02"; Id = "tst-client-02"; DnsName = "Client 02"; ExpiresInMonths = $CertificateExpirationInMonths }
+            )
+        }
+    )
+}
 
 
 # =====================================================================
@@ -25,51 +58,54 @@ $certificatePassword = ConvertTo-SecureString -String 'P@ssw0rd' -Force -AsPlain
 # Generate self-signed certificates
 # =====================================================================
 
-$rootCA = New-SelfSignedRootCACertificate -Subject "CN=APIM Sample Root CA" -ExpiresInMonths $certificateExpirationInMonths
+$rootCACert = New-SelfSignedRootCACertificate -Subject $certificateTree.Subject -ExpiresInMonths $certificateTree.ExpiresInMonths
 
-# create certificates for dev environment
-$devIntermediateCA = New-SelfSignedIntermediateCACertificate -Subject "CN=APIM Sample DEV Intermediate CA" -Signer $rootCA -ExpiresInMonths $certificateExpirationInMonths
-$devClient01 = New-SelfSignedClientCertificate -Subject "CN=Client 01" -DnsName "Client 01" -Signer $devIntermediateCA -ExpiresInMonths $certificateExpirationInMonths
-$devClient02 = New-SelfSignedClientCertificate -Subject "CN=Client 02" -DnsName "Client 02" -Signer $devIntermediateCA -ExpiresInMonths $certificateExpirationInMonths
+$intermediateCACerts = @{}
+$clientCerts = @{}
 
-# create certificates for tst environment
-$tstIntermediateCA = New-SelfSignedIntermediateCACertificate -Subject "CN=APIM Sample TST Intermediate CA" -Signer $rootCA -ExpiresInMonths $certificateExpirationInMonths
-$tstClient01 = New-SelfSignedClientCertificate -Subject "CN=Client 01" -DnsName "Client 01" -Signer $tstIntermediateCA -ExpiresInMonths $certificateExpirationInMonths
-$tstClient02 = New-SelfSignedClientCertificate -Subject "CN=Client 02" -DnsName "Client 02" -Signer $tstIntermediateCA -ExpiresInMonths $certificateExpirationInMonths
+foreach ($intermediate in $certificateTree.Intermediates) {
+    $intermediateCert = New-SelfSignedIntermediateCACertificate -Subject $intermediate.Subject -Signer $rootCACert -ExpiresInMonths $intermediate.ExpiresInMonths
+    $intermediateCACerts[$intermediate.Id] = $intermediateCert
+
+    foreach ($client in $intermediate.Clients) {
+        $dnsName = if ($client.ContainsKey('DnsName')) { $client.DnsName } else { $client.Subject }
+        $clientCert = New-SelfSignedClientCertificate -Subject $client.Subject -DnsName $dnsName -Signer $intermediateCert -ExpiresInMonths $client.ExpiresInMonths
+        $clientCerts[$client.Id] = $clientCert
+    }
+}
 
 
 # =====================================================================
 # Export self-signed certificates
 # =====================================================================
 
-if (-not(Test-Path -Path $exportPath))
-{
+if (-not(Test-Path -Path $exportPath)) {
     New-Item -Path $exportPath -ItemType Directory | Out-Null
 }
 
-# Export the certificates without private key as base64 encoded X.509 (.cer) files
+# Export the root CA certificate without private key as base64 encoded X.509 (.cer) files
 
-Export-CertificateAsBase64 -Certificate $rootCA -OutputFilePath "$exportPath\root-ca.cer"
-Export-CertificateAsBase64 -Certificate $rootCA -OutputFilePath "$exportPath\root-ca.without-markers.cer" -ExcludeMarkers
+Export-CertificateAsBase64 -Certificate $rootCACert -OutputFilePath "$exportPath\$($certificateTree.Id).cer"
+Export-CertificateAsBase64 -Certificate $rootCACert -OutputFilePath "$exportPath\$($certificateTree.Id).without-markers.cer" -ExcludeMarkers
 
-Export-CertificateAsBase64 -Certificate $devIntermediateCA -OutputFilePath "$exportPath\dev-intermediate-ca.cer"
-Export-CertificateAsBase64 -Certificate $devIntermediateCA -OutputFilePath "$exportPath\dev-intermediate-ca.without-markers.cer" -ExcludeMarkers
-Export-CertificateAsBase64 -Certificate $devClient01 -OutputFilePath "$exportPath\dev-client-01.cer"
-Export-CertificateAsBase64 -Certificate $devClient01 -OutputFilePath "$exportPath\dev-client-01.without-markers.cer" -ExcludeMarkers
-Export-CertificateAsBase64 -Certificate $devClient02 -OutputFilePath "$exportPath\dev-client-02.cer"
+foreach ($intermediate in $certificateTree.Intermediates) {
+    $intermediateCert = $intermediateCACerts[$intermediate.Id]
 
-Export-CertificateAsBase64 -Certificate $tstIntermediateCA -OutputFilePath "$exportPath\tst-intermediate-ca.cer"
-Export-CertificateAsBase64 -Certificate $tstIntermediateCA -OutputFilePath "$exportPath\tst-intermediate-ca.without-markers.cer" -ExcludeMarkers
-Export-CertificateAsBase64 -Certificate $tstClient01 -OutputFilePath "$exportPath\tst-client-01.cer"
-Export-CertificateAsBase64 -Certificate $tstClient02 -OutputFilePath "$exportPath\tst-client-02.cer"
+    # Export the intermediate CA certificate without private key as base64 encoded X.509 (.cer) files
+    Export-CertificateAsBase64 -Certificate $intermediateCert -OutputFilePath "$exportPath\$($intermediate.Id).cer"
+    Export-CertificateAsBase64 -Certificate $intermediateCert -OutputFilePath "$exportPath\$($intermediate.Id).without-markers.cer" -ExcludeMarkers
 
-# Export the client certificates with private key as .pfx file
+    foreach ($client in $intermediate.Clients) {
+        $clientCert = $clientCerts[$client.Id]
 
-Export-PfxCertificate -Cert $devClient01 -FilePath "$exportPath\dev-client-01.pfx" -Password $certificatePassword
-Export-PfxCertificate -Cert $devClient02 -FilePath "$exportPath\dev-client-02.pfx" -Password $certificatePassword
+        # Export the client certificate without private key as base64 encoded X.509 (.cer) files
+        Export-CertificateAsBase64 -Certificate $clientCert -OutputFilePath "$exportPath\$($client.Id).cer"
+        Export-CertificateAsBase64 -Certificate $clientCert -OutputFilePath "$exportPath\$($client.Id).without-markers.cer" -ExcludeMarkers
 
-Export-PfxCertificate -Cert $tstClient01 -FilePath "$exportPath\tst-client-01.pfx" -Password $certificatePassword
-Export-PfxCertificate -Cert $tstClient02 -FilePath "$exportPath\tst-client-02.pfx" -Password $certificatePassword
+        # Export the client certificate with private key as .pfx file
+        Export-PfxCertificate -Cert $clientCert -FilePath "$exportPath\$($client.Id).pfx" -Password $CertificatePassword
+    }
+}
 
 
 # =====================================================================
@@ -78,8 +114,7 @@ Export-PfxCertificate -Cert $tstClient02 -FilePath "$exportPath\tst-client-02.pf
 
 # All (CA) certificates in a certificate chain need to be combined when uploading them in Azure Application Gateway
 
-Merge-Base64CertificateFiles -InputFilePaths @( "$exportPath\dev-intermediate-ca.cer", "$exportPath\root-ca.cer" ) `
-                             -OutputFilePath "$exportPath\dev-intermediate-ca-with-root-ca.cer"
-
-Merge-Base64CertificateFiles -InputFilePaths @( "$exportPath\tst-intermediate-ca.cer", "$exportPath\root-ca.cer" ) `
-                             -OutputFilePath "$exportPath\tst-intermediate-ca-with-root-ca.cer"
+foreach ($intermediate in $certificateTree.Intermediates) {
+    Merge-Base64CertificateFiles -InputFilePaths @( "$exportPath\$($intermediate.Id).cer", "$exportPath\$($certificateTree.Id).cer" ) `
+        -OutputFilePath "$exportPath\$($intermediate.Id)-with-$($certificateTree.Id).cer"
+}

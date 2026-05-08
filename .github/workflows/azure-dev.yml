@@ -10,7 +10,7 @@ on:
         type: boolean
   pull_request:
     # Also trigger on ready_for_review to catch the transition from draft to ready state.
-    types: [ opened, synchronize, reopened, ready_for_review ]
+    types: [opened, synchronize, reopened, ready_for_review]
     branches:
       - main
     paths:
@@ -109,6 +109,7 @@ jobs:
             --location $env:AZURE_LOCATION `
             --parameters resourceGroupName='sample' `
                          apiManagementServiceName='sample' `
+                         keyVaultName='sample' `
                          validateCertificateChainInProtectedApi=false
 
       - name: Create artifacts folder
@@ -241,7 +242,7 @@ jobs:
 
   cleanup:
     name: Clean Up Resources
-    needs: [ deploy, verify-deployment ]
+    needs: [deploy, verify-deployment]
     if: ${{ success() && (github.event_name != 'workflow_dispatch' || github.event.inputs.cleanup-resources == 'true') }}
     runs-on: ubuntu-latest
     permissions:

@@ -35,12 +35,23 @@ resource validateCertificateChainNamedValue 'Microsoft.ApiManagement/service/nam
   }
 }
 
-// Add client certificate for 'Dev Client 01'
-resource devClient01Certificate 'Microsoft.ApiManagement/service/certificates@2025-03-01-preview' = {
-  name: 'dev-client-01'
+// Add Trusted Client Certificates to API Management
+// NOTE: The 'Unprotected API' client certificate is also trusted, but it's already added to API Management in ../unprotected-api/unprotected-api.bicep referencing Key Vault.
+//       Adding it here as well (without the private key) would cause a 'duplicate certificate' deployment error.
+
+resource client01ClientCertificate 'Microsoft.ApiManagement/service/certificates@2025-03-01-preview' = {
+  name: 'client-01-client-certificate'
   parent: apiManagementService
   properties: {
     data: loadTextContent('../../../self-signed-certificates/certificates/dev-client-01.without-markers.cer')
+  }
+}
+
+resource integrationTestsClientCertificate 'Microsoft.ApiManagement/service/certificates@2025-03-01-preview' = {
+  name: 'integration-tests-client-certificate'
+  parent: apiManagementService
+  properties: {
+    data: loadTextContent('../../../self-signed-certificates/certificates/dev-integration-tests.without-markers.cer')
   }
 }
 
@@ -60,7 +71,7 @@ resource protectedApi 'Microsoft.ApiManagement/service/apis@2025-03-01-preview' 
 }
 
 // Operation to validate client certificate using validate-client-certificate policy
-resource validateUsingPolicy 'Microsoft.ApiManagement/service/apis/operations@2025-03-01-preview' = {
+resource validateUsingPolicyOperation 'Microsoft.ApiManagement/service/apis/operations@2025-03-01-preview' = {
   name: 'validate-using-policy'
   parent: protectedApi
   properties: {
@@ -83,7 +94,7 @@ resource validateUsingPolicy 'Microsoft.ApiManagement/service/apis/operations@20
 }
 
 // Operation to validate client certificate using context.Request.Certificate property
-resource validateUsingContext 'Microsoft.ApiManagement/service/apis/operations@2025-03-01-preview' = {
+resource validateUsingContextOperation 'Microsoft.ApiManagement/service/apis/operations@2025-03-01-preview' = {
   name: 'validate-using-context'
   parent: protectedApi
   properties: {
