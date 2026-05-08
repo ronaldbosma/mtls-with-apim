@@ -6,6 +6,13 @@
 
 > TODO intro
 
+> [!WARNING]  
+> This repository intentionally includes self-signed certificates (including private keys) **for local development and demo/template convenience only**.
+> In real-world scenarios, **never** commit certificates with private keys to source control.
+> Use proper secret/certificate management and generate certificates as part of your secure environment/tooling.
+> We included these files here to keep this template easy to use without adding an extra dependency on certificate generation tools (for example, OpenSSL).
+
+
 > [!IMPORTANT]  
 > This template is not production-ready; it uses minimal cost SKUs and omits network isolation, advanced security, governance and resiliency. Harden security, implement enterprise controls and/or replace modules with [Azure Verified Modules](https://azure.github.io/Azure-Verified-Modules/) before any production use.
 
