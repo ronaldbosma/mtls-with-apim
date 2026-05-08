@@ -39,7 +39,7 @@ resource clientCertificateSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' 
 // Client Certificate
 
 resource clientCertificate 'Microsoft.ApiManagement/service/certificates@2025-03-01-preview' = {
-  name: 'client-certificate'
+  name: 'unprotected-api-client-certificate'
   parent: apiManagementService
   properties: {
     keyVault: {
@@ -54,7 +54,7 @@ resource protectedBackend 'Microsoft.ApiManagement/service/backends@2025-03-01-p
   parent: apiManagementService
   name: 'protected-backend'
   properties: {
-    description: 'The protected backend. Forwards requests to the Protected API in the same APIM instance.'
+    description: 'The protected backend. Forwards requests to the Protected API in the same API Management instance.'
 
     // Note: This configuration uses the public gateway URL for the backend.
     // For API Management instances running inside a VNet, you would typically use https://localhost/... as the backend URL.

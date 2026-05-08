@@ -38,16 +38,16 @@ resource validateCertificateChainNamedValue 'Microsoft.ApiManagement/service/nam
 // Add Trusted Client Certificates to API Management
 // NOTE: The 'Unprotected API' client certificate is also trusted, but it's already added to API Management in ../unprotected-api/unprotected-api.bicep.
 
-resource devClient01Certificate 'Microsoft.ApiManagement/service/certificates@2025-03-01-preview' = {
-  name: 'dev-client-01'
+resource client01ClientCertificate 'Microsoft.ApiManagement/service/certificates@2025-03-01-preview' = {
+  name: 'client-01-client-certificate'
   parent: apiManagementService
   properties: {
     data: loadTextContent('../../../self-signed-certificates/certificates/dev-client-01.without-markers.cer')
   }
 }
 
-resource integrationTestClientCertificate 'Microsoft.ApiManagement/service/certificates@2025-03-01-preview' = {
-  name: 'integration-test-client-certificate'
+resource integrationTestsClientCertificate 'Microsoft.ApiManagement/service/certificates@2025-03-01-preview' = {
+  name: 'integration-tests-client-certificate'
   parent: apiManagementService
   properties: {
     data: loadTextContent('../../../self-signed-certificates/certificates/dev-integration-tests.without-markers.cer')
