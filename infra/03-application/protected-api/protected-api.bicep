@@ -36,7 +36,8 @@ resource validateCertificateChainNamedValue 'Microsoft.ApiManagement/service/nam
 }
 
 // Add Trusted Client Certificates to API Management
-// NOTE: The 'Unprotected API' client certificate is also trusted, but it's already added to API Management in ../unprotected-api/unprotected-api.bicep.
+// NOTE: The 'Unprotected API' client certificate is also trusted, but it's already added to API Management in ../unprotected-api/unprotected-api.bicep referencing Key Vault.
+//       Adding it here as well (without the private key) would cause a 'duplicate certificate' deployment error.
 
 resource client01ClientCertificate 'Microsoft.ApiManagement/service/certificates@2025-03-01-preview' = {
   name: 'client-01-client-certificate'
