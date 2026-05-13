@@ -12,16 +12,16 @@ The script [generate-client-certificates.ps1](./generate-client-certificates.ps1
 
 ![self-signed certificates](../images/diagrams-self-signed-certificates.png)
 
-APIM Sample Root CA
-- APIM Sample DEV Intermediate CA
-  - Client 01: is registered in API Management as a valid client
-  - Client 02: is NOT registered in API Management and should be blocked
-  - Unprotected API: is used by when the Unprotected API calls the Protected API using mTLS
-  - Integration Tests: is used as a valid client during integration tests
-  - Expired: is an expired certificate for testing purposes
-  - Not Yet Valid: is a certificate that is valid in the future and used for testing purposes
-- APIM Sample TST Intermediate CA
-  - Client 01 & Client 02: can be used to test what happens when certificates from another intermediate CA are used
+- **APIM Sample Root CA**: is the root CA for this sample
+  - **APIM Sample DEV Intermediate CA**: is intermediate CA for a 'dev' environment
+    - **Client 01**: is registered in API Management as a valid client
+    - **Client 02**: is NOT registered in API Management and should be blocked
+    - **Unprotected API**: is used by when the Unprotected API calls the Protected API using mTLS
+    - **Integration Tests**: is used as a valid client during integration tests
+    - **Expired**: is an expired certificate for testing purposes
+    - **Not Yet Valid**: is a certificate that is valid in the future and used for testing purposes
+  - **APIM Sample TST Intermediate CA**: is intermediate CA for a 'dev' environment
+    - **Client 01 & Client 02**: can be used to test what happens when certificates from another intermediate CA are used
 
 See the [certificates](./certificates) folder for the generated certificates. The `.pfx` files are password protected with the password `P@ssw0rd`. They are valid until `May 13, 2076`, except for the Expired certificate.
 
