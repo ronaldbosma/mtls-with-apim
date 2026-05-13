@@ -48,6 +48,7 @@ public sealed class ProtectedApiTests
 
         // Assert
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.AreEqual("ClientCertificateNotFound", response.Headers.GetValues("ErrorReason").FirstOrDefault());
 
         var content = await response.Content.ReadAsStringAsync();
         Assert.Contains("Client certificate missing", content);
@@ -64,6 +65,7 @@ public sealed class ProtectedApiTests
 
         // Assert
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.AreEqual("ClientCertificateIdentityNotMatched", response.Headers.GetValues("ErrorReason").FirstOrDefault());
 
         var content = await response.Content.ReadAsStringAsync();
         Assert.Contains("Invalid client certificate", content);
@@ -80,6 +82,7 @@ public sealed class ProtectedApiTests
 
         // Assert
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.AreEqual("ClientCertificateExpired", response.Headers.GetValues("ErrorReason").FirstOrDefault());
 
         var content = await response.Content.ReadAsStringAsync();
         Assert.Contains("Invalid client certificate", content);
