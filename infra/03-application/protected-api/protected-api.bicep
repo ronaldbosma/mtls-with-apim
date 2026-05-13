@@ -55,22 +55,6 @@ resource integrationTestsClientCertificate 'Microsoft.ApiManagement/service/cert
   }
 }
 
-resource expiredClientCertificate 'Microsoft.ApiManagement/service/certificates@2025-03-01-preview' = {
-  name: 'expired-client-certificate'
-  parent: apiManagementService
-  properties: {
-    data: loadTextContent('../../../self-signed-certificates/certificates/dev-expired.without-markers.cer')
-  }
-}
-
-resource notYetValidClientCertificate 'Microsoft.ApiManagement/service/certificates@2025-03-01-preview' = {
-  name: 'not-yet-valid-client-certificate'
-  parent: apiManagementService
-  properties: {
-    data: loadTextContent('../../../self-signed-certificates/certificates/dev-notyetvalid.without-markers.cer')
-  }
-}
-
 // API
 
 resource protectedApi 'Microsoft.ApiManagement/service/apis@2025-03-01-preview' = {
