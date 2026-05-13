@@ -16,6 +16,7 @@ public sealed class ProtectedApiTests
     private static readonly X509Certificate2 ValidClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/dev-integration-tests.pfx", "P@ssw0rd");
     private static readonly X509Certificate2 InvalidClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/tst-client-01.pfx", "P@ssw0rd");
     private static readonly X509Certificate2 ExpiredClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/dev-expired.pfx", "P@ssw0rd");
+    private static readonly X509Certificate2 NotYetValidClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/dev-notyetvalid.pfx", "P@ssw0rd");
 
     [ClassCleanup]
     public static void ClassCleanup()
@@ -89,6 +90,23 @@ public sealed class ProtectedApiTests
     }
 
     [TestMethod]
+    public async Task ValidateUsingPolicy_NotYetValidClientCertificateProvided_401UnauthorizedReturned()
+    {
+        // Arrange
+        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, NotYetValidClientCertificate);
+
+        // Act
+        var response = await apimClient.GetAsync("protected/validate-using-policy");
+
+        // Assert
+        Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.AreEqual("ClientCertificateNotYetValid", response.Headers.GetValues("ErrorReason").FirstOrDefault());
+
+        var content = await response.Content.ReadAsStringAsync();
+        Assert.Contains("Invalid client certificate", content);
+    }
+
+    [TestMethod]
     public async Task ValidateUsingContext_ValidClientCertificateProvided_200OkReturned()
     {
         // Arrange
@@ -144,5 +162,20 @@ public sealed class ProtectedApiTests
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         Assert.IsNotNull(response.ReasonPhrase);
         Assert.Contains("ClientCertificateExpired", response.ReasonPhrase);
+    }
+
+    [TestMethod]
+    public async Task ValidateUsingContext_NotYetValidClientCertificateProvided_401UnauthorizedReturned()
+    {
+        // Arrange
+        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, NotYetValidClientCertificate);
+
+        // Act
+        var response = await apimClient.GetAsync("protected/validate-using-context");
+
+        // Assert
+        Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.IsNotNull(response.ReasonPhrase);
+        Assert.Contains("ClientCertificateNotYetValid", response.ReasonPhrase);
     }
 }

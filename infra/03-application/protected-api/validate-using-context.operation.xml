@@ -10,7 +10,11 @@
             }
 
             var now = DateTime.Now; // We are using DateTime.Now because NotBefore and NotAfter are in local time
-            if (context.Request.Certificate.NotBefore > now || context.Request.Certificate.NotAfter < now)
+            if (context.Request.Certificate.NotBefore > now)
+            {
+                return "ClientCertificateNotYetValid";
+            }
+            if (context.Request.Certificate.NotAfter < now)
             {
                 return "ClientCertificateExpired";
             }
