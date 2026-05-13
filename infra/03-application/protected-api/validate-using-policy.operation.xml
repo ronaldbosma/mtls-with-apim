@@ -14,6 +14,7 @@
                 <identity subject="CN=Unprotected API" issuer-subject="CN=APIM Sample DEV Intermediate CA" />
                 <identity subject="CN=Integration Tests" issuer-subject="CN=APIM Sample DEV Intermediate CA" />
                 <identity subject="CN=Expired" issuer-subject="CN=APIM Sample DEV Intermediate CA" />
+                <identity subject="CN=NotYetValid" issuer-subject="CN=APIM Sample DEV Intermediate CA" />
             </identities>
         </validate-client-certificate>
 
