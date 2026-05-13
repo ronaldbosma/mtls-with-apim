@@ -23,6 +23,8 @@ public sealed class ProtectedApiTests
     {
         ValidClientCertificate.Dispose();
         InvalidClientCertificate.Dispose();
+        ExpiredClientCertificate.Dispose();
+        NotYetValidClientCertificate.Dispose();
     }
 
     [TestMethod]
