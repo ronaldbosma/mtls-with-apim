@@ -9,15 +9,19 @@
                     <set-status code="401" reason="Client certificate missing" />
                 </return-response>
             </when>
-			
+
 			<!--
 				Return a 401 Unauthorized
-				- if validate-certificate-chain is true but the client certificate or its chain is invalid
-				- or if the provided client certificate is not a known certificate in API Management that we trust
+                - if validate-certificate-chain is true but the client certificate or its chain is invalid
+                - or if the client certificate is not yet valid or has expired
+                - or if the provided client certificate is not a known certificate in API Management that we trust
 			-->
             <when condition="@{
-                return ({{validate-certificate-chain}} && !context.Request.Certificate.VerifyNoRevocation()) ||
-                       !context.Deployment.Certificates.Any(c => c.Value.Thumbprint == context.Request.Certificate.Thumbprint);
+                  var now = DateTime.Now; // We're using DateTime.Now because NotBefore and NotAfter are in local time
+                  return ({{validate-certificate-chain}} && !context.Request.Certificate.VerifyNoRevocation()) ||
+                      context.Request.Certificate.NotBefore > now ||
+                      context.Request.Certificate.NotAfter < now ||
+                      !context.Deployment.Certificates.Any(c => c.Value.Thumbprint == context.Request.Certificate.Thumbprint);
             }">
                 <return-response>
                     <set-status code="401" reason="Invalid client certificate" />
