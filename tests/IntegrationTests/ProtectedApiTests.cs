@@ -113,7 +113,7 @@ public sealed class ProtectedApiTests
         // Assert
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         Assert.IsNotNull(response.ReasonPhrase);
-        Assert.Contains("Client certificate missing", response.ReasonPhrase);
+        Assert.Contains("ClientCertificateNotFound", response.ReasonPhrase);
     }
 
     [TestMethod]
@@ -128,7 +128,7 @@ public sealed class ProtectedApiTests
         // Assert
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         Assert.IsNotNull(response.ReasonPhrase);
-        Assert.Contains("Invalid client certificate", response.ReasonPhrase);
+        Assert.Contains("ClientCertificateIdentityNotMatched", response.ReasonPhrase);
     }
 
     [TestMethod]
@@ -143,6 +143,6 @@ public sealed class ProtectedApiTests
         // Assert
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         Assert.IsNotNull(response.ReasonPhrase);
-        Assert.Contains("Invalid client certificate", response.ReasonPhrase);
+        Assert.Contains("ClientCertificateExpired", response.ReasonPhrase);
     }
 }

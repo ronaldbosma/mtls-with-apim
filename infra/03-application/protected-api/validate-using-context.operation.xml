@@ -2,29 +2,37 @@
     <inbound>
         <base />
 
-        <choose>
-			<!-- Return a 401 Unauthorized if no client certificate was provided -->
-            <when condition="@(context.Request.Certificate == null)">
-                <return-response>
-                    <set-status code="401" reason="Client certificate missing" />
-                </return-response>
-            </when>
+        <!-- Determine if the client certificate is valid and store the reason in a variable -->
+        <set-variable name="certificateValidationResult" value="@{
+            if (context.Request.Certificate == null)
+            {
+                return "ClientCertificateNotFound";
+            }
 
-			<!--
-				Return a 401 Unauthorized
-                - if validate-certificate-chain is true but the client certificate or its chain is invalid
-                - or if the client certificate is not yet valid or has expired
-                - or if the provided client certificate is not a known certificate in API Management that we trust
-			-->
-            <when condition="@{
-                  var now = DateTime.Now; // We're using DateTime.Now because NotBefore and NotAfter are in local time
-                  return ({{validate-certificate-chain}} && !context.Request.Certificate.VerifyNoRevocation()) ||
-                      context.Request.Certificate.NotBefore > now ||
-                      context.Request.Certificate.NotAfter < now ||
-                      !context.Deployment.Certificates.Any(c => c.Value.Thumbprint == context.Request.Certificate.Thumbprint);
-            }">
+            var now = DateTime.Now; // We are using DateTime.Now because NotBefore and NotAfter are in local time
+            if (context.Request.Certificate.NotBefore > now || context.Request.Certificate.NotAfter < now)
+            {
+                return "ClientCertificateExpired";
+            }
+
+            if (({{validate-certificate-chain}} && !context.Request.Certificate.VerifyNoRevocation()) ||
+                !context.Deployment.Certificates.Any(c => c.Value.Thumbprint == context.Request.Certificate.Thumbprint))
+            {
+                return "ClientCertificateIdentityNotMatched";
+            }
+
+            return null;
+        }" />
+
+        <choose>
+            <!-- Trace and return a 401 Unauthorized if the client certificate is not valid -->
+            <when condition="@(context.Variables.GetValueOrDefault<string>("certificateValidationResult") != null)">
+                <trace source="validate-using-context" severity="error">
+                    <message>@("Client certificate validation failed: " + context.Variables.GetValueOrDefault<string>("certificateValidationResult"))</message>
+                </trace>
                 <return-response>
-                    <set-status code="401" reason="Invalid client certificate" />
+                    <!-- Include error reason for demo purposes. Don't expose sensitive information in production and use a generic error message instead. -->
+                    <set-status code="401" reason='@(context.Variables.GetValueOrDefault<string>("certificateValidationResult"))' />
                 </return-response>
             </when>
         </choose>
