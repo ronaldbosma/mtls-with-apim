@@ -26,15 +26,14 @@ $certificateTree = @{
             Id              = "dev-intermediate-ca"
             ExpiresInMonths = $CertificateExpirationInMonths
             Clients         = @(
-                @{ Subject = "CN=Client 01"; Id = "dev-client-01"; DnsName = "Client 01"; StartsAfterMonths = 0; ExpiresInMonths = $CertificateExpirationInMonths },
-                @{ Subject = "CN=Client 02"; Id = "dev-client-02"; DnsName = "Client 02"; StartsAfterMonths = 0; ExpiresInMonths = $CertificateExpirationInMonths },
+                @{ Subject = "CN=Valid Client"; Id = "dev-valid-client"; DnsName = "Valid Client"; StartsAfterMonths = 0; ExpiresInMonths = $CertificateExpirationInMonths },
+                @{ Subject = "CN=Unregistered Client"; Id = "dev-unregistered-client"; DnsName = "Unregistered Client"; StartsAfterMonths = 0; ExpiresInMonths = $CertificateExpirationInMonths },
                 @{ Subject = "CN=Unprotected API"; Id = "dev-unprotected-api"; DnsName = "Unprotected API"; StartsAfterMonths = 0; ExpiresInMonths = $CertificateExpirationInMonths },
-                @{ Subject = "CN=Integration Tests"; Id = "dev-integration-tests"; DnsName = "Integration Tests"; StartsAfterMonths = 0; ExpiresInMonths = $CertificateExpirationInMonths },
 
                 # Create a client certificate that is not yet valid by setting the NotBefore date in the future. This can be used to test the NotBefore validation in APIM.
-                @{ Subject = "CN=NotYetValid"; Id = "dev-notyetvalid"; DnsName = "NotYetValid"; StartsAfterMonths = $CertificateExpirationInMonths - 1; ExpiresInMonths = $CertificateExpirationInMonths },
+                @{ Subject = "CN=Not Yet Valid Client"; Id = "dev-notyetvalid-client"; DnsName = "Not Yet Valid Client"; StartsAfterMonths = $CertificateExpirationInMonths - 1; ExpiresInMonths = $CertificateExpirationInMonths },
                 # Create an expired client certificate by setting the NotAfter date in the past. This can be used to test the NotAfter validation in APIM.
-                @{ Subject = "CN=Expired"; Id = "dev-expired"; DnsName = "Expired"; StartsAfterMonths = 0; ExpiresInMonths = 0 }
+                @{ Subject = "CN=Expired Client"; Id = "dev-expired-client"; DnsName = "Expired"; StartsAfterMonths = 0; ExpiresInMonths = 0 }
             )
         },
         @{
@@ -42,8 +41,7 @@ $certificateTree = @{
             Id              = "tst-intermediate-ca"
             ExpiresInMonths = $CertificateExpirationInMonths
             Clients         = @(
-                @{ Subject = "CN=Client 01"; Id = "tst-client-01"; DnsName = "Client 01"; StartsAfterMonths = 0; ExpiresInMonths = $CertificateExpirationInMonths },
-                @{ Subject = "CN=Client 02"; Id = "tst-client-02"; DnsName = "Client 02"; StartsAfterMonths = 0; ExpiresInMonths = $CertificateExpirationInMonths }
+                @{ Subject = "CN=Untrusted Client"; Id = "tst-untrusted-client"; DnsName = "Untrusted Client"; StartsAfterMonths = 0; ExpiresInMonths = $CertificateExpirationInMonths }
             )
         }
     )

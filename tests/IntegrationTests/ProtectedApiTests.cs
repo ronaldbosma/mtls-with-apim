@@ -13,11 +13,11 @@ namespace IntegrationTests;
 public sealed class ProtectedApiTests
 {
     private static readonly TestConfiguration Config = TestConfiguration.Load();
-    private static readonly X509Certificate2 ValidClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/dev-integration-tests.pfx", "P@ssw0rd");
-    private static readonly X509Certificate2 UnregisteredClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/dev-client-02.pfx", "P@ssw0rd");
-    private static readonly X509Certificate2 UntrustedClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/tst-client-01.pfx", "P@ssw0rd");
-    private static readonly X509Certificate2 ExpiredClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/dev-expired.pfx", "P@ssw0rd");
-    private static readonly X509Certificate2 NotYetValidClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/dev-notyetvalid.pfx", "P@ssw0rd");
+    private static readonly X509Certificate2 ValidClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/dev-valid-client.pfx", "P@ssw0rd");
+    private static readonly X509Certificate2 UnregisteredClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/dev-unregistered-client.pfx", "P@ssw0rd");
+    private static readonly X509Certificate2 UntrustedClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/tst-untrusted-client.pfx", "P@ssw0rd");
+    private static readonly X509Certificate2 ExpiredClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/dev-expired-client.pfx", "P@ssw0rd");
+    private static readonly X509Certificate2 NotYetValidClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/dev-notyetvalid-client.pfx", "P@ssw0rd");
 
     [ClassCleanup]
     public static void ClassCleanup()
