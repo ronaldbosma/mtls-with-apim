@@ -33,7 +33,7 @@ $certificateTree = @{
                 # Create a client certificate that is not yet valid by setting the NotBefore date in the future. This can be used to test the NotBefore validation in APIM.
                 @{ Subject = "CN=Not Yet Valid Client"; Id = "dev-notyetvalid-client"; DnsName = "Not Yet Valid Client"; StartsAfterMonths = $CertificateExpirationInMonths - 1; ExpiresInMonths = $CertificateExpirationInMonths },
                 # Create an expired client certificate by setting the NotAfter date in the past. This can be used to test the NotAfter validation in APIM.
-                @{ Subject = "CN=Expired Client"; Id = "dev-expired-client"; DnsName = "Expired"; StartsAfterMonths = 0; ExpiresInMonths = 0 }
+                @{ Subject = "CN=Expired Client"; Id = "dev-expired-client"; DnsName = "Expired Client"; StartsAfterMonths = 0; ExpiresInMonths = 0 }
             )
         },
         @{
