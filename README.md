@@ -87,6 +87,21 @@ azd down --purge
 
 ## Configuration
 
+### API Management SKU
+
+The SKU of the API Management service is configured through the `apiManagementSku` parameter in [main.parameters.json](/infra/02-platform/main.parameters.json). The default is `BasicV2`.
+
+Supported values are: `Consumption`, `Developer`, `Basic`, `Standard`, `Premium`, `StandardV2`, and `BasicV2`.
+
+To change it to a different value, like `Developer`, run the following command before deploying the template:
+
+```cmd
+azd env set AZURE_API_MANAGEMENT_SKU Developer
+```
+
+> [!NOTE]
+> Validating the certificate chain of a certificate is not supported on v2 tier APIM instances. See [Validate client certificate chain in Protected API](#validate-client-certificate-chain-in-protected-api) for more details.
+
 ### Validate client certificate chain in Protected API
 
 By default, the Protected API does not validate the client certificate chain. This feature is not supported on v2 tier APIM instances because they [do not support uploading CA certificates](https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-ca-certificates). If you enable it on a v2 tier APIM instance, requests that use the self-signed client certificates from this repository will always return `401 Unauthorized`, because APIM will try to validate the certificate chain but the CA chain is not available to APIM.

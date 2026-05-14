@@ -29,6 +29,7 @@ env:
   AZURE_ENV_NAME: ${{ github.event.pull_request.number && format('{0}-pr{1}', vars.AZURE_ENV_NAME, github.event.pull_request.number) || vars.AZURE_ENV_NAME }}
   AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
   AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID || vars.AZURE_SUBSCRIPTION_ID }}
+  AZURE_API_MANAGEMENT_SKU: ${{ vars.AZURE_API_MANAGEMENT_SKU || 'BasicV2' }}
 
 jobs:
   # ------------------------------------------------------------
@@ -100,7 +101,8 @@ jobs:
                          agwPublicIpAddressName='sample' `
                          appInsightsName='sample' `
                          keyVaultName='sample' `
-                         logAnalyticsWorkspaceName='sample'
+                         logAnalyticsWorkspaceName='sample' `
+                         apiManagementSku=$env:AZURE_API_MANAGEMENT_SKU
 
       - name: Validate Application Layer Template
         run: |

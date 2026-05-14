@@ -10,7 +10,7 @@ targetScope = 'subscription'
 
 import { getResourceName } from '../99-shared/naming-conventions.bicep'
 import { getTemplateTags } from '../99-shared/helpers.bicep'
-import { apiManagementSettingsType, applicationGatewaySettingsType, virtualNetworkSettingsType } from '../99-shared/settings.bicep'
+import { apiManagementSettingsType, apimSkuType, applicationGatewaySettingsType, virtualNetworkSettingsType } from '../99-shared/settings.bicep'
 
 //=============================================================================
 // Parameters
@@ -43,13 +43,16 @@ param keyVaultName string
 @description('The name of the Log Analytics workspace to use')
 param logAnalyticsWorkspaceName string
 
+@description('The SKU of the API Management service to deploy')
+param apiManagementSku apimSkuType
+
 //=============================================================================
 // Variables
 //=============================================================================
 
 var apiManagementSettings apiManagementSettingsType = {
   serviceName: getResourceName('apiManagement', environmentName, location, instanceId)
-  sku: 'BasicV2' // BasicV2 is used because the Consumption tier does not support CA certificates.
+  sku: apiManagementSku
 }
 
 var applicationGatewaySettings applicationGatewaySettingsType = {
@@ -116,6 +119,9 @@ module appGateway 'modules/application-gateway.bicep' = {
 // Return the names of the resources
 output AZURE_API_MANAGEMENT_NAME string = apiManagementSettings.serviceName
 output AZURE_APPLICATION_GATEWAY_NAME string = applicationGatewaySettings.applicationGatewayName
+
+// Return the SKU of the API Management service
+output AZURE_API_MANAGEMENT_SKU string = apiManagementSettings.sku
 
 // Return resource endpoints
 output AZURE_API_MANAGEMENT_GATEWAY_URL string = apiManagement.outputs.gatewayUrl
