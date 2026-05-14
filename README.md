@@ -63,6 +63,8 @@ Once the prerequisites are installed on your machine, you can deploy this templa
    az login
    ```
 
+1. Before deploying, review the [Configuration](#configuration) section for useful options such as selecting the API Management SKU, enabling certificate chain validation for the protected API, and including or excluding Application Gateway.
+
 1. Run the `azd up` command to provision the resources in your Azure subscription.
 
    ```cmd
