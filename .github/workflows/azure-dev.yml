@@ -29,6 +29,8 @@ env:
   AZURE_ENV_NAME: ${{ github.event.pull_request.number && format('{0}-pr{1}', vars.AZURE_ENV_NAME, github.event.pull_request.number) || vars.AZURE_ENV_NAME }}
   AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
   AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID || vars.AZURE_SUBSCRIPTION_ID }}
+  AZURE_API_MANAGEMENT_SKU: ${{ vars.AZURE_API_MANAGEMENT_SKU || 'BasicV2' }}
+  INCLUDE_APPLICATION_GATEWAY: ${{ vars.INCLUDE_APPLICATION_GATEWAY || 'true' }}
 
 jobs:
   # ------------------------------------------------------------
@@ -86,7 +88,8 @@ jobs:
             --template-file './infra/01-core/main.bicep' `
             --location $env:AZURE_LOCATION `
             --parameters environmentName=$env:AZURE_ENV_NAME `
-                         location=$env:AZURE_LOCATION
+                         location=$env:AZURE_LOCATION `
+                         includeApplicationGateway=$env:INCLUDE_APPLICATION_GATEWAY
 
       - name: Validate Platform Layer Template
         run: |+
@@ -100,7 +103,9 @@ jobs:
                          agwPublicIpAddressName='sample' `
                          appInsightsName='sample' `
                          keyVaultName='sample' `
-                         logAnalyticsWorkspaceName='sample'
+                         logAnalyticsWorkspaceName='sample' `
+                         apiManagementSku=$env:AZURE_API_MANAGEMENT_SKU `
+                         includeApplicationGateway=$env:INCLUDE_APPLICATION_GATEWAY
 
       - name: Validate Application Layer Template
         run: |
@@ -168,7 +173,7 @@ jobs:
 
       - name: Provision Infrastructure
         run: |
-          azd provision --no-prompt
+          azd provision --no-prompt --no-state
 
       # Extract relevant azd environment variables and make them available as job outputs for subsequent jobs.
       - name: Get Output Variables

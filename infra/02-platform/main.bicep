@@ -43,13 +43,21 @@ param keyVaultName string
 @description('The name of the Log Analytics workspace to use')
 param logAnalyticsWorkspaceName string
 
+@description('The SKU of the API Management service to deploy')
+// Exclude Consumption because setting 'enableClientCertificate' to true makes mTLS mandatory for all APIs,
+// which breaks several demo scenarios that must remain accessible without client certificates.
+param apiManagementSku 'Developer' | 'Basic' | 'Standard' | 'Premium' | 'BasicV2' | 'StandardV2' | 'PremiumV2'
+
+@description('Whether to include the Application Gateway in the deployment')
+param includeApplicationGateway bool
+
 //=============================================================================
 // Variables
 //=============================================================================
 
 var apiManagementSettings apiManagementSettingsType = {
   serviceName: getResourceName('apiManagement', environmentName, location, instanceId)
-  sku: 'BasicV2' // BasicV2 is used because the Consumption tier does not support CA certificates.
+  sku: apiManagementSku
 }
 
 var applicationGatewaySettings applicationGatewaySettingsType = {
@@ -88,7 +96,7 @@ module apiManagement 'modules/api-management.bicep' = {
   }
 }
 
-module virtualNetwork 'modules/virtual-network.bicep' = {
+module virtualNetwork 'modules/virtual-network.bicep' = if (includeApplicationGateway) {
   scope: resourceGroup
   params: {
     location: location
@@ -97,13 +105,13 @@ module virtualNetwork 'modules/virtual-network.bicep' = {
   }
 }
 
-module appGateway 'modules/application-gateway.bicep' = {
+module appGateway 'modules/application-gateway.bicep' = if (includeApplicationGateway) {
   scope: resourceGroup
   params: {
     location: location
     tags: tags
     applicationGatewaySettings: applicationGatewaySettings
-    subnetId: virtualNetwork.outputs.agwSubnetId
+    subnetId: virtualNetwork!.outputs.agwSubnetId
     apiManagementServiceName: apiManagementSettings.serviceName
     logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
   }
@@ -116,6 +124,9 @@ module appGateway 'modules/application-gateway.bicep' = {
 // Return the names of the resources
 output AZURE_API_MANAGEMENT_NAME string = apiManagementSettings.serviceName
 output AZURE_APPLICATION_GATEWAY_NAME string = applicationGatewaySettings.applicationGatewayName
+
+// Return the SKU of the API Management service
+output AZURE_API_MANAGEMENT_SKU string = apiManagementSettings.sku
 
 // Return resource endpoints
 output AZURE_API_MANAGEMENT_GATEWAY_URL string = apiManagement.outputs.gatewayUrl

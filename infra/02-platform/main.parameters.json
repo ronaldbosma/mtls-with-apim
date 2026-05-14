@@ -25,6 +25,12 @@
     },
     "logAnalyticsWorkspaceName": {
       "value": "${AZURE_LOG_ANALYTICS_WORKSPACE_NAME}"
+    },
+    "apiManagementSku": {
+      "value": "${AZURE_API_MANAGEMENT_SKU=BasicV2}"
+    },
+    "includeApplicationGateway": {
+      "value": "${INCLUDE_APPLICATION_GATEWAY}"
     }
   }
 }
