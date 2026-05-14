@@ -257,6 +257,37 @@ API Management does not support changing the SKU of an existing instance from on
 
    If you remove APIM manually, make sure the service is also purged (not left in soft-deleted state), otherwise redeployment with the same name can still fail.
 
+### There are no changes to provision for your application
+
+This template uses layered provisioning and `azd`'s deployment state detection does not always work correctly in this setup. You might see output like the following, indicating that the application layer has no changes to deploy even though it was not actually provisioned. This can happen, for example, if you previously deployed the template and then removed it.
+
+```
+Provisioning Azure resources (azd provision)
+Provisioning Azure resources can take some time.
+
+Subscription: My Azure Subscription (00000000-0000-0000-0000-000000000000)
+Location: Sweden Central
+Layer: application
+
+  (-) Skipped: Didn't find new changes.
+
+SUCCESS: There are no changes to provision for your application.
+```
+
+Use the `--no-state` flag to force `azd` to ignore its stored deployment state and redeploy the layers.
+
+To redeploy all layers, run:
+
+```cmd
+azd provision --no-state
+```
+
+To redeploy only a specific layer, such as the application layer, run:
+
+```cmd
+azd provision application --no-state
+```
+
 ### API Management deployment failed because the service already exists in soft-deleted state
 
 If you've previously deployed this template and deleted the resources, you may encounter the following error when redeploying the template. This error occurs because the API Management service is in a soft-deleted state and needs to be purged before you can create a new service with the same name.
