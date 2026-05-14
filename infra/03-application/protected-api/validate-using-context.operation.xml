@@ -19,8 +19,12 @@
                 return "ClientCertificateExpired";
             }
 
-            if (({{validate-certificate-chain}} && !context.Request.Certificate.VerifyNoRevocation()) ||
-                !context.Deployment.Certificates.Any(c => c.Value.Thumbprint == context.Request.Certificate.Thumbprint))
+            if ({{validate-certificate-chain}} && !context.Request.Certificate.VerifyNoRevocation())
+            {
+                return "ClientCertificateNotTrusted";
+            }
+
+            if (!context.Deployment.Certificates.Any(c => c.Value.Thumbprint == context.Request.Certificate.Thumbprint))
             {
                 return "ClientCertificateIdentityNotMatched";
             }

@@ -10,6 +10,7 @@ internal class TestConfiguration
     public required Uri AzureApiManagementGatewayUrl { get; init; }
     public required Uri AzureKeyVaultUri { get; init; }
     public required string DirectoryWithClientCertificates { get; init; }
+    public bool CertificateChainIsValidatedInProtectedApi { get; private set; }
 
     public static TestConfiguration Load()
     {
@@ -23,7 +24,8 @@ internal class TestConfiguration
         {
             AzureApiManagementGatewayUrl = configuration.GetRequiredUri("AZURE_API_MANAGEMENT_GATEWAY_URL"),
             AzureKeyVaultUri = configuration.GetRequiredUri("AZURE_KEY_VAULT_URI"),
-            DirectoryWithClientCertificates = configuration["DIRECTORY_WITH_CLIENT_CERTIFICATES"] ?? @"../../../../../self-signed-certificates/certificates"
+            DirectoryWithClientCertificates = configuration["DIRECTORY_WITH_CLIENT_CERTIFICATES"] ?? @"../../../../../self-signed-certificates/certificates",
+            CertificateChainIsValidatedInProtectedApi = configuration.GetRequiredBool("VALIDATE_CERTIFICATE_CHAIN_IN_PROTECTED_API")
         };
     }
 }

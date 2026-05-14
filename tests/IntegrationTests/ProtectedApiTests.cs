@@ -14,7 +14,8 @@ public sealed class ProtectedApiTests
 {
     private static readonly TestConfiguration Config = TestConfiguration.Load();
     private static readonly X509Certificate2 ValidClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/dev-integration-tests.pfx", "P@ssw0rd");
-    private static readonly X509Certificate2 InvalidClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/tst-client-01.pfx", "P@ssw0rd");
+    private static readonly X509Certificate2 UnregisteredClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/dev-client-02.pfx", "P@ssw0rd");
+    private static readonly X509Certificate2 UntrustedClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/tst-client-01.pfx", "P@ssw0rd");
     private static readonly X509Certificate2 ExpiredClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/dev-expired.pfx", "P@ssw0rd");
     private static readonly X509Certificate2 NotYetValidClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/dev-notyetvalid.pfx", "P@ssw0rd");
 
@@ -22,7 +23,7 @@ public sealed class ProtectedApiTests
     public static void ClassCleanup()
     {
         ValidClientCertificate.Dispose();
-        InvalidClientCertificate.Dispose();
+        UntrustedClientCertificate.Dispose();
         ExpiredClientCertificate.Dispose();
         NotYetValidClientCertificate.Dispose();
     }
@@ -58,10 +59,10 @@ public sealed class ProtectedApiTests
     }
 
     [TestMethod]
-    public async Task ValidateUsingPolicy_InvalidClientCertificateProvided_401UnauthorizedReturned()
+    public async Task ValidateUsingPolicy_UnregisteredClientCertificateProvided_401UnauthorizedReturned()
     {
         // Arrange
-        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, InvalidClientCertificate);
+        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, UnregisteredClientCertificate);
 
         // Act
         var response = await apimClient.GetAsync("protected/validate-using-policy");
@@ -69,6 +70,25 @@ public sealed class ProtectedApiTests
         // Assert
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         Assert.AreEqual("ClientCertificateIdentityNotMatched", response.Headers.GetValues("ErrorReason").FirstOrDefault());
+
+        var content = await response.Content.ReadAsStringAsync();
+        Assert.Contains("Invalid client certificate", content);
+    }
+
+    [TestMethod]
+    public async Task ValidateUsingPolicy_UntrustedClientCertificateProvided_401UnauthorizedReturned()
+    {
+        // Arrange
+        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, UntrustedClientCertificate);
+
+        // Act
+        var response = await apimClient.GetAsync("protected/validate-using-policy");
+
+        // Assert
+        Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+
+        var expectedReason = Config.CertificateChainIsValidatedInProtectedApi ? "ClientCertificateNotTrusted" : "ClientCertificateIdentityNotMatched";
+        Assert.AreEqual(expectedReason, response.Headers.GetValues("ErrorReason").FirstOrDefault());
 
         var content = await response.Content.ReadAsStringAsync();
         Assert.Contains("Invalid client certificate", content);
@@ -133,14 +153,14 @@ public sealed class ProtectedApiTests
         // Assert
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         Assert.IsNotNull(response.ReasonPhrase);
-        Assert.Contains("ClientCertificateNotFound", response.ReasonPhrase);
+        Assert.AreEqual("ClientCertificateNotFound", response.ReasonPhrase);
     }
 
     [TestMethod]
-    public async Task ValidateUsingContext_InvalidClientCertificateProvided_401UnauthorizedReturned()
+    public async Task ValidateUsingContext_UnregisteredClientCertificateProvided_401UnauthorizedReturned()
     {
         // Arrange
-        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, InvalidClientCertificate);
+        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, UnregisteredClientCertificate);
 
         // Act
         var response = await apimClient.GetAsync("protected/validate-using-context");
@@ -148,7 +168,24 @@ public sealed class ProtectedApiTests
         // Assert
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         Assert.IsNotNull(response.ReasonPhrase);
-        Assert.Contains("ClientCertificateIdentityNotMatched", response.ReasonPhrase);
+        Assert.AreEqual("ClientCertificateIdentityNotMatched", response.ReasonPhrase);
+    }
+
+    [TestMethod]
+    public async Task ValidateUsingContext_UntrustedClientCertificateProvided_401UnauthorizedReturned()
+    {
+        // Arrange
+        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, UntrustedClientCertificate);
+
+        // Act
+        var response = await apimClient.GetAsync("protected/validate-using-context");
+
+        // Assert
+        Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.IsNotNull(response.ReasonPhrase);
+
+        var expectedReason = Config.CertificateChainIsValidatedInProtectedApi ? "ClientCertificateNotTrusted" : "ClientCertificateIdentityNotMatched";
+        Assert.AreEqual(expectedReason, response.ReasonPhrase);
     }
 
     [TestMethod]
@@ -163,7 +200,7 @@ public sealed class ProtectedApiTests
         // Assert
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         Assert.IsNotNull(response.ReasonPhrase);
-        Assert.Contains("ClientCertificateExpired", response.ReasonPhrase);
+        Assert.AreEqual("ClientCertificateExpired", response.ReasonPhrase);
     }
 
     [TestMethod]
@@ -178,6 +215,6 @@ public sealed class ProtectedApiTests
         // Assert
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
         Assert.IsNotNull(response.ReasonPhrase);
-        Assert.Contains("ClientCertificateNotYetValid", response.ReasonPhrase);
+        Assert.AreEqual("ClientCertificateNotYetValid", response.ReasonPhrase);
     }
 }
