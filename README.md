@@ -63,6 +63,8 @@ Once the prerequisites are installed on your machine, you can deploy this templa
    az login
    ```
 
+1. Before deploying, review the [Configuration](#configuration) section for useful options such as selecting the API Management SKU, enabling certificate chain validation for the protected API, and including or excluding Application Gateway.
+
 1. Run the `azd up` command to provision the resources in your Azure subscription.
 
    ```cmd
@@ -87,6 +89,22 @@ azd down --purge
 
 ## Configuration
 
+### API Management SKU
+
+The SKU of the API Management service is configured through the `apiManagementSku` parameter in [main.parameters.json](/infra/02-platform/main.parameters.json). The default is `BasicV2`.
+
+To change it to a different value, like `Developer`, run the following command before deploying the template:
+
+```cmd
+azd env set AZURE_API_MANAGEMENT_SKU Developer
+```
+
+If API Management is already deployed, you cannot change the SKU across tier families in place (for example, from `BasicV2` to `Developer`). See [Troubleshooting](#troubleshooting) for resolution options.
+
+
+> [!NOTE]
+> Certificate chain validation is not supported on v2 tier APIM instances. See [Validate client certificate chain in Protected API](#validate-client-certificate-chain-in-protected-api) for more details.
+
 ### Validate client certificate chain in Protected API
 
 By default, the Protected API does not validate the client certificate chain. This feature is not supported on v2 tier APIM instances because they [do not support uploading CA certificates](https://learn.microsoft.com/en-us/azure/api-management/api-management-howto-ca-certificates). If you enable it on a v2 tier APIM instance, requests that use the self-signed client certificates from this repository will always return `401 Unauthorized`, because APIM will try to validate the certificate chain but the CA chain is not available to APIM.
@@ -104,6 +122,18 @@ If you have already deployed the template, you only have to redeploy the applica
 ```cmd
 azd provision application
 ```
+
+### Include Application Gateway
+
+By default, the Application Gateway is included in the deployment. It is configured through the `includeApplicationGateway` parameter in [main.parameters.json](/infra/01-core/main.parameters.json) (core layer) and [main.parameters.json](/infra/02-platform/main.parameters.json) (platform layer).
+
+To exclude the Application Gateway and related resources, run the following command before deploying the template:
+
+```cmd
+azd env set INCLUDE_APPLICATION_GATEWAY false
+```
+
+Note that the Application Gateway will not be removed if it's already deployed, this setting is disabled, and `azd up` or `azd provision` is executed again. You will need to manually remove the resources from the Azure portal or use `azd down --purge` to remove the entire environment.
 
 ## Contents
 
@@ -189,6 +219,72 @@ The tests send the same test requests described in the [Demo](./demos/demo.md) a
 They automatically locate your azd environment's `.env` file if available, to retrieve necessary configuration. In the [pipeline](#pipeline) they rely on environment variables set in the workflow.
 
 ## Troubleshooting
+
+### Changing SkuType from 'A' to 'B' is not Supported.
+
+If you deployed API Management with one SKU, then changed it as described in [this config section](#api-management-sku) and redeployed, you might see the following error:
+
+```
+ERROR: A resource with this name already exists or is in a conflicting state.
+
+Suggestion: Check for existing or soft-deleted resources in the Azure portal.
+
+deployment failed: error deploying infrastructure: deploying to subscription: 
+
+Deployment Error Details:
+ChangingSkuTypeNotSupported: Changing SkuType from 'BasicV2' to 'Developer' is not Supported.
+```
+
+API Management does not support changing the SKU of an existing instance from one tier family to another. To resolve this issue, use one of the following approaches:
+
+1. Revert the SKU setting to the previously deployed value.
+
+   Use the same value that was previously used for the `AZURE_API_MANAGEMENT_SKU` environment variable, as described in [this config section](#api-management-sku).
+
+1. Recreate the environment with the new SKU.
+
+   Remove the current environment first, then set the desired SKU and deploy again:
+  
+   ```cmd
+   azd down --purge
+   ```
+
+   After cleanup, set `AZURE_API_MANAGEMENT_SKU` to the new value and run `azd up`.
+
+1. Manually delete and purge the API Management instance, then redeploy.
+
+   If you remove APIM manually, make sure the service is also purged (not left in soft-deleted state), otherwise redeployment with the same name can still fail.
+
+### There are no changes to provision for your application
+
+This template uses layered provisioning and `azd`'s deployment state detection does not always work correctly in this setup. You might see output like the following, indicating that the application layer has no changes to deploy even though it was not actually provisioned. This can happen, for example, if you previously deployed the template and then removed it.
+
+```
+Provisioning Azure resources (azd provision)
+Provisioning Azure resources can take some time.
+
+Subscription: My Azure Subscription (00000000-0000-0000-0000-000000000000)
+Location: Sweden Central
+Layer: application
+
+  (-) Skipped: Didn't find new changes.
+
+SUCCESS: There are no changes to provision for your application.
+```
+
+Use the `--no-state` flag to force `azd` to ignore its stored deployment state and redeploy the layers.
+
+To redeploy all layers, run:
+
+```cmd
+azd provision --no-state
+```
+
+To redeploy only a specific layer, such as the application layer, run:
+
+```cmd
+azd provision application --no-state
+```
 
 ### API Management deployment failed because the service already exists in soft-deleted state
 

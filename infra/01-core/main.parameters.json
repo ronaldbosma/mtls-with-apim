@@ -7,6 +7,9 @@
     },
     "location": {
       "value": "${AZURE_LOCATION}"
+    },
+    "includeApplicationGateway": {
+      "value": "${INCLUDE_APPLICATION_GATEWAY=true}"
     }
   }
 }

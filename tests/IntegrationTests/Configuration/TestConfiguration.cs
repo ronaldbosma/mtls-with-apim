@@ -8,7 +8,6 @@ namespace IntegrationTests.Configuration;
 internal class TestConfiguration
 {
     public required Uri AzureApiManagementGatewayUrl { get; init; }
-    public required Uri AzureApplicationGatewayUrl { get; init; }
     public required Uri AzureKeyVaultUri { get; init; }
     public required string DirectoryWithClientCertificates { get; init; }
 
@@ -23,7 +22,6 @@ internal class TestConfiguration
         return new TestConfiguration
         {
             AzureApiManagementGatewayUrl = configuration.GetRequiredUri("AZURE_API_MANAGEMENT_GATEWAY_URL"),
-            AzureApplicationGatewayUrl = new Uri($"http://{configuration.GetRequiredString("AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_VALUE")}"),
             AzureKeyVaultUri = configuration.GetRequiredUri("AZURE_KEY_VAULT_URI"),
             DirectoryWithClientCertificates = configuration["DIRECTORY_WITH_CLIENT_CERTIFICATES"] ?? @"../../../../../self-signed-certificates/certificates"
         };

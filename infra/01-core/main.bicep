@@ -25,6 +25,9 @@ param location string
 @description('The name of the environment to deploy to')
 param environmentName string
 
+@description('Whether to include the Application Gateway in the deployment')
+param includeApplicationGateway bool
+
 //=============================================================================
 // Variables
 //=============================================================================
@@ -56,7 +59,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2025-04-01' = {
   tags: tags
 }
 
-module agwPublicIpAddress 'modules/public-ip-address.bicep' = {
+module agwPublicIpAddress 'modules/public-ip-address.bicep' = if (includeApplicationGateway) {
   scope: resourceGroup
   params: {
     location: location
@@ -112,5 +115,8 @@ output AZURE_LOG_ANALYTICS_WORKSPACE_NAME string = appInsightsSettings.logAnalyt
 output AZURE_RESOURCE_GROUP string = resourceGroupName
 
 // Return resource endpoints
-output AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_VALUE string = agwPublicIpAddress.outputs.ipAddress
+output AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_VALUE string = agwPublicIpAddress.?outputs.ipAddress ?? ''
 output AZURE_KEY_VAULT_URI string = keyVault.outputs.vaultUri
+
+// Return which services are included in the deployment
+output INCLUDE_APPLICATION_GATEWAY bool = includeApplicationGateway
