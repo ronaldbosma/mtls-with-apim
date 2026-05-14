@@ -28,6 +28,9 @@ public sealed class ProtectedApiTests
         NotYetValidClientCertificate.Dispose();
     }
 
+    /// <remarks>
+    /// This test will fail for an APIM v2 tier where certificate chain validation is enabled, because the client certificate will be untrusted.
+    /// </remarks>
     [TestMethod]
     public async Task ValidateUsingPolicy_ValidClientCertificateProvided_200OkReturned()
     {
@@ -58,6 +61,9 @@ public sealed class ProtectedApiTests
         Assert.Contains("Client certificate missing", content);
     }
 
+    /// <remarks>
+    /// This test will fail for an APIM v2 tier where certificate chain validation is enabled, because the client certificate will be untrusted.
+    /// </remarks>
     [TestMethod]
     public async Task ValidateUsingPolicy_UnregisteredClientCertificateProvided_401UnauthorizedReturned()
     {
@@ -128,6 +134,9 @@ public sealed class ProtectedApiTests
         Assert.Contains("Invalid client certificate", content);
     }
 
+    /// <remarks>
+    /// This test will fail for an APIM v2 tier where certificate chain validation is enabled, because the client certificate will be untrusted.
+    /// </remarks>
     [TestMethod]
     public async Task ValidateUsingContext_ValidClientCertificateProvided_200OkReturned()
     {
@@ -156,6 +165,9 @@ public sealed class ProtectedApiTests
         Assert.AreEqual("ClientCertificateNotFound", response.ReasonPhrase);
     }
 
+    /// <remarks>
+    /// This test will fail for an APIM v2 tier where certificate chain validation is enabled, because the client certificate will be untrusted.
+    /// </remarks>
     [TestMethod]
     public async Task ValidateUsingContext_UnregisteredClientCertificateProvided_401UnauthorizedReturned()
     {

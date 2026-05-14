@@ -13,6 +13,9 @@ public sealed class UnprotectedApiTests
 {
     private static readonly TestConfiguration Config = TestConfiguration.Load();
 
+    /// <remarks>
+    /// This test will fail for an APIM v2 tier where certificate chain validation is enabled, because the Unprotected API's client certificate will be untrusted.
+    /// </remarks>
     [TestMethod]
     public async Task ValidateUsingPolicy_NoClientCertificateProvided_200OkReturned()
     {
@@ -26,6 +29,9 @@ public sealed class UnprotectedApiTests
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
     }
 
+    /// <remarks>
+    /// This test will fail for an APIM v2 tier where certificate chain validation is enabled, because the Unprotected API's client certificate will be untrusted.
+    /// </remarks>
     [TestMethod]
     public async Task ValidateUsingContext_NoClientCertificateProvided_200OkReturned()
     {
