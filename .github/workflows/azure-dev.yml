@@ -173,7 +173,7 @@ jobs:
 
       - name: Provision Infrastructure
         run: |
-          azd provision --no-prompt
+          azd provision --no-prompt --no-state
 
       # Extract relevant azd environment variables and make them available as job outputs for subsequent jobs.
       - name: Get Output Variables
