@@ -93,15 +93,13 @@ azd down --purge
 
 The SKU of the API Management service is configured through the `apiManagementSku` parameter in [main.parameters.json](/infra/02-platform/main.parameters.json). The default is `BasicV2`.
 
-Supported values are: `Consumption`, `Developer`, `Basic`, `Standard`, `Premium`, `StandardV2`, and `BasicV2`.
-
 To change it to a different value, like `Developer`, run the following command before deploying the template:
 
 ```cmd
 azd env set AZURE_API_MANAGEMENT_SKU Developer
 ```
 
-If API Management is already deployed, you cannot change the SKU across tier families in place (for example, from `BasicV2` to `Consumption`). See [Troubleshooting](#troubleshooting) for resolution options.
+If API Management is already deployed, you cannot change the SKU across tier families in place (for example, from `BasicV2` to `Developer`). See [Troubleshooting](#troubleshooting) for resolution options.
 
 
 > [!NOTE]
@@ -234,7 +232,7 @@ Suggestion: Check for existing or soft-deleted resources in the Azure portal.
 deployment failed: error deploying infrastructure: deploying to subscription: 
 
 Deployment Error Details:
-ChangingSkuTypeNotSupported: Changing SkuType from 'BasicV2' to 'Consumption' is not Supported.
+ChangingSkuTypeNotSupported: Changing SkuType from 'BasicV2' to 'Developer' is not Supported.
 ```
 
 API Management does not support changing the SKU of an existing instance from one tier family to another. To resolve this issue, use one of the following approaches:
