@@ -101,6 +101,9 @@ To change it to a different value, like `Developer`, run the following command b
 azd env set AZURE_API_MANAGEMENT_SKU Developer
 ```
 
+If API Management is already deployed, you cannot change the SKU across tier families in place (for example, from `BasicV2` to `Consumption`). See [Troubleshooting](#troubleshooting) for resolution options.
+
+
 > [!NOTE]
 > Certificate chain validation is not supported on v2 tier APIM instances. See [Validate client certificate chain in Protected API](#validate-client-certificate-chain-in-protected-api) for more details.
 
@@ -218,6 +221,41 @@ The tests send the same test requests described in the [Demo](./demos/demo.md) a
 They automatically locate your azd environment's `.env` file if available, to retrieve necessary configuration. In the [pipeline](#pipeline) they rely on environment variables set in the workflow.
 
 ## Troubleshooting
+
+### Changing SkuType from 'A' to 'B' is not Supported.
+
+If you deployed API Management with one SKU, then changed it as described in [this config section](#api-management-sku) and redeployed, you might see the following error:
+
+```
+ERROR: A resource with this name already exists or is in a conflicting state.
+
+Suggestion: Check for existing or soft-deleted resources in the Azure portal.
+
+deployment failed: error deploying infrastructure: deploying to subscription: 
+
+Deployment Error Details:
+ChangingSkuTypeNotSupported: Changing SkuType from 'BasicV2' to 'Consumption' is not Supported.
+```
+
+API Management does not support changing the SKU of an existing instance from one tier family to another. To resolve this issue, use one of the following approaches:
+
+1. Revert the SKU setting to the previously deployed value.
+
+   Use the same value that was previously used for the `AZURE_API_MANAGEMENT_SKU` environment variable, as described in [this config section](#api-management-sku).
+
+1. Recreate the environment with the new SKU.
+
+   Remove the current environment first, then set the desired SKU and deploy again:
+  
+   ```cmd
+   azd down --purge
+   ```
+
+   After cleanup, set `AZURE_API_MANAGEMENT_SKU` to the new value and run `azd up`.
+
+1. Manually delete and purge the API Management instance, then redeploy.
+
+   If you remove APIM manually, make sure the service is also purged (not left in soft-deleted state), otherwise redeployment with the same name can still fail.
 
 ### API Management deployment failed because the service already exists in soft-deleted state
 
