@@ -23,6 +23,7 @@ public sealed class ProtectedApiTests
     public static void ClassCleanup()
     {
         ValidClientCertificate.Dispose();
+        UnregisteredClientCertificate.Dispose();
         UntrustedClientCertificate.Dispose();
         ExpiredClientCertificate.Dispose();
         NotYetValidClientCertificate.Dispose();
