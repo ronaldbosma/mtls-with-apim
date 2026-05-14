@@ -22,7 +22,7 @@ The script [generate-client-certificates.ps1](./generate-client-certificates.ps1
   - **APIM Sample TST Intermediate CA**: is intermediate CA for a 'test' environment
     - **Untrusted Client**: can be used to test what happens when certificates from an untrusted intermediate CA are used
 
-See the [certificates](./certificates) folder for the generated certificates. The `.pfx` files are password protected with the password `P@ssw0rd`. They are valid until `May 13, 2076`, except for the Expired certificate.
+See the [certificates](./certificates) folder for the generated certificates. The `.pfx` files are password protected with the password `P@ssw0rd`. They are valid until `May 14, 2076`, except for the Expired certificate.
 
 ## Generate certificates
 
