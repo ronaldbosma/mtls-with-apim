@@ -102,7 +102,7 @@ azd env set AZURE_API_MANAGEMENT_SKU Developer
 ```
 
 > [!NOTE]
-> Validating the certificate chain of a certificate is not supported on v2 tier APIM instances. See [Validate client certificate chain in Protected API](#validate-client-certificate-chain-in-protected-api) for more details.
+> Certificate chain validation is not supported on v2 tier APIM instances. See [Validate client certificate chain in Protected API](#validate-client-certificate-chain-in-protected-api) for more details.
 
 ### Validate client certificate chain in Protected API
 
