@@ -10,7 +10,7 @@ internal class TestConfiguration
     public required Uri AzureApiManagementGatewayUrl { get; init; }
     public required Uri AzureKeyVaultUri { get; init; }
     public required string DirectoryWithClientCertificates { get; init; }
-    public bool CertificateChainIsValidatedInProtectedApi { get; private set; }
+    public required bool CertificateChainIsValidatedInProtectedApi { get; init; }
 
     public static TestConfiguration Load()
     {
