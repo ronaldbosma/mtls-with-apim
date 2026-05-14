@@ -114,7 +114,7 @@ It can be enabled through the `validateCertificateChainInProtectedApi` parameter
 To enable it, run the following command before deploying the template:
 
 ```cmd
-azd env set VALIDATE_CERTIFICATE_CHAIN_IN_PROTECTED_API=true
+azd env set VALIDATE_CERTIFICATE_CHAIN_IN_PROTECTED_API true
 ```
 
 If you have already deployed the template, you only have to redeploy the application layer to apply the change: 

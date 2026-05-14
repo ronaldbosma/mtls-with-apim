@@ -150,6 +150,7 @@ jobs:
       AZURE_API_MANAGEMENT_GATEWAY_URL: ${{ steps.get-outputs.outputs.AZURE_API_MANAGEMENT_GATEWAY_URL }}
       AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_VALUE: ${{ steps.get-outputs.outputs.AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_VALUE }}
       AZURE_KEY_VAULT_URI: ${{ steps.get-outputs.outputs.AZURE_KEY_VAULT_URI }}
+      VALIDATE_CERTIFICATE_CHAIN_IN_PROTECTED_API: ${{ steps.get-outputs.outputs.VALIDATE_CERTIFICATE_CHAIN_IN_PROTECTED_API }}
 
     steps:
       - name: Checkout code
@@ -182,7 +183,8 @@ jobs:
           $variableNames = @(
             "AZURE_API_MANAGEMENT_GATEWAY_URL",
             "AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_VALUE",
-            "AZURE_KEY_VAULT_URI"
+            "AZURE_KEY_VAULT_URI",
+            "VALIDATE_CERTIFICATE_CHAIN_IN_PROTECTED_API"
           )
           .\.github\workflows\scripts\export-azd-env-variables.ps1 -VariableNames $variableNames
 
@@ -231,6 +233,7 @@ jobs:
           AZURE_API_MANAGEMENT_GATEWAY_URL: ${{ needs.deploy.outputs.AZURE_API_MANAGEMENT_GATEWAY_URL }}
           AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_VALUE: ${{ needs.deploy.outputs.AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_VALUE }}
           AZURE_KEY_VAULT_URI: ${{ needs.deploy.outputs.AZURE_KEY_VAULT_URI }}
+          VALIDATE_CERTIFICATE_CHAIN_IN_PROTECTED_API: ${{ needs.deploy.outputs.VALIDATE_CERTIFICATE_CHAIN_IN_PROTECTED_API }}
           DIRECTORY_WITH_CLIENT_CERTIFICATES: "${{ github.workspace }}/self-signed-certificates/certificates"
 
       - name: Upload Test Results

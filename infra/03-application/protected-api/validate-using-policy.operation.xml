@@ -10,9 +10,8 @@
 					NOTE: When validate-certificate-chain is false, using only subject/issuer-subject matching is spoofable (a client can present a cert with the same DN strings).
 					For a protected mTLS endpoint, consider validating by thumbprint so the check can't be bypassed by matching strings.
 				-->
-                <identity subject="CN=Client 01" issuer-subject="CN=APIM Sample DEV Intermediate CA" />
+                <identity subject="CN=Valid Client" issuer-subject="CN=APIM Sample DEV Intermediate CA" />
                 <identity subject="CN=Unprotected API" issuer-subject="CN=APIM Sample DEV Intermediate CA" />
-                <identity subject="CN=Integration Tests" issuer-subject="CN=APIM Sample DEV Intermediate CA" />
             </identities>
         </validate-client-certificate>
 
@@ -32,6 +31,7 @@
     </outbound>
 
     <on-error>
+        <!-- Include error details in the response headers. Don't expose sensitive information in production. -->
         <set-header name="ErrorSource" exists-action="override">
             <value>@(context.LastError.Source)</value>
         </set-header>
