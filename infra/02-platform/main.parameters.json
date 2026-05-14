@@ -28,6 +28,9 @@
     },
     "apiManagementSku": {
       "value": "${AZURE_API_MANAGEMENT_SKU=BasicV2}"
+    },
+    "includeApplicationGateway": {
+      "value": "${INCLUDE_APPLICATION_GATEWAY}"
     }
   }
 }

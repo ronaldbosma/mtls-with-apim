@@ -46,6 +46,9 @@ param logAnalyticsWorkspaceName string
 @description('The SKU of the API Management service to deploy')
 param apiManagementSku apimSkuType
 
+@description('Whether to include the Application Gateway in the deployment')
+param includeApplicationGateway bool
+
 //=============================================================================
 // Variables
 //=============================================================================
@@ -91,7 +94,7 @@ module apiManagement 'modules/api-management.bicep' = {
   }
 }
 
-module virtualNetwork 'modules/virtual-network.bicep' = {
+module virtualNetwork 'modules/virtual-network.bicep' = if (includeApplicationGateway) {
   scope: resourceGroup
   params: {
     location: location
@@ -100,13 +103,13 @@ module virtualNetwork 'modules/virtual-network.bicep' = {
   }
 }
 
-module appGateway 'modules/application-gateway.bicep' = {
+module appGateway 'modules/application-gateway.bicep' = if (includeApplicationGateway) {
   scope: resourceGroup
   params: {
     location: location
     tags: tags
     applicationGatewaySettings: applicationGatewaySettings
-    subnetId: virtualNetwork.outputs.agwSubnetId
+    subnetId: virtualNetwork!.outputs.agwSubnetId
     apiManagementServiceName: apiManagementSettings.serviceName
     logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
   }

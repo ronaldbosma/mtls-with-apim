@@ -120,6 +120,18 @@ If you have already deployed the template, you only have to redeploy the applica
 azd provision application
 ```
 
+### Include Application Gateway
+
+By default, the Application Gateway is included in the deployment. It is configured through the `includeApplicationGateway` parameter in [main.parameters.json](/infra/01-core/main.parameters.json) (core layer) and [main.parameters.json](/infra/02-platform/main.parameters.json) (platform layer).
+
+To exclude the Application Gateway and related resources, run the following command before deploying the template:
+
+```cmd
+azd env set INCLUDE_APPLICATION_GATEWAY false
+```
+
+Note that the Application Gateway will not be removed if it's already deployed, this setting is disabled, and `azd up` or `azd provision` is executed again. You will need to manually remove the resources from the Azure portal or use `azd down --purge` to remove the entire environment.
+
 ## Contents
 
 The repository consists of the following files and directories:
