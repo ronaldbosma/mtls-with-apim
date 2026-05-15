@@ -28,6 +28,12 @@ param subnetId string
 @description('The name of the API Management Service to use')
 param apiManagementServiceName string
 
+@description('The name of the App Insights instance to use')
+param appInsightsName string
+
+@description('The name of the Key Vault that contains the secrets and certificates')
+param keyVaultName string
+
 @description('The name of the Log Analytics workspace to use')
 param logAnalyticsWorkspaceName string
 
@@ -43,11 +49,35 @@ resource agwPublicIPAddress 'Microsoft.Network/publicIPAddresses@2025-05-01' exi
   name: applicationGatewaySettings.publicIpAddressName
 }
 
+resource keyVault 'Microsoft.KeyVault/vaults@2025-05-01' existing = {
+  name: keyVaultName
+}
+
+resource sslServerCertificateSecret 'Microsoft.KeyVault/vaults/secrets@2025-05-01' existing = {
+  name: 'agw-ssl-server-certificate'
+  parent: keyVault
+}
+
 //=============================================================================
 // Resources
 //=============================================================================
 
-// Public IP address
+// Create user-assigned identity for Application Gateway and assign roles to it
+
+resource agwIdentity 'Microsoft.ManagedIdentity/userAssignedIdentities@2024-11-30' = {
+  name: applicationGatewaySettings.identityName
+  location: location
+  tags: tags
+}
+
+module assignRolesToAgwUserAssignedIdentity '../../99-shared/assign-roles-to-principal.bicep' = {
+  params: {
+    principalId: agwIdentity.properties.principalId
+    principalType: 'ServicePrincipal'
+    appInsightsName: appInsightsName
+    keyVaultName: keyVaultName
+  }
+}
 
 // Application Gateway
 
@@ -55,6 +85,14 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2025-05-01' =
   name: applicationGatewaySettings.applicationGatewayName
   location: location
   tags: tags
+
+  identity: {
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${agwIdentity.id}': {}
+    }
+  }
+
   properties: {
     sku: {
       name: 'Standard_v2'
@@ -92,19 +130,28 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2025-05-01' =
 
     frontendPorts: [
       {
-        name: 'port-http'
+        name: 'port-https'
         properties: {
-          port: 80
+          port: 443
+        }
+      }
+    ]
+
+    sslCertificates: [
+      {
+        name: 'agw-ssl-certificate'
+        properties: {
+          keyVaultSecretId: sslServerCertificateSecret.properties.secretUri
         }
       }
     ]
 
     httpListeners: [
       {
-        name: 'http-listener'
+        name: 'https-listener'
         properties: {
-          protocol: 'Http'
-          // requireServerNameIndication: false
+          protocol: 'Https'
+          hostName: 'agw-sample.dev'
           frontendIPConfiguration: {
             id: resourceId(
               'Microsoft.Network/applicationGateways/frontendIPConfigurations',
@@ -116,7 +163,14 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2025-05-01' =
             id: resourceId(
               'Microsoft.Network/applicationGateways/frontendPorts',
               applicationGatewaySettings.applicationGatewayName,
-              'port-http'
+              'port-https'
+            )
+          }
+          sslCertificate: {
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/sslCertificates',
+              applicationGatewaySettings.applicationGatewayName,
+              'agw-ssl-certificate'
             )
           }
         }
@@ -164,7 +218,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2025-05-01' =
           port: 443
           protocol: 'Https'
           cookieBasedAffinity: 'Disabled'
-          hostName: '${apiManagementServiceName}.azure-api.net'
+          hostName: getApiManagementFqdn(apiManagementServiceName)
           requestTimeout: 20
           probe: {
             id: resourceId(
@@ -189,7 +243,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2025-05-01' =
             id: resourceId(
               'Microsoft.Network/applicationGateways/httpListeners',
               applicationGatewaySettings.applicationGatewayName,
-              'http-listener'
+              'https-listener'
             )
           }
           backendAddressPool: {

@@ -62,6 +62,7 @@ var apiManagementSettings apiManagementSettingsType = {
 
 var applicationGatewaySettings applicationGatewaySettingsType = {
   applicationGatewayName: getResourceName('applicationGateway', environmentName, location, instanceId)
+  identityName: getResourceName('managedIdentity', environmentName, location, 'agw-${instanceId}')
   publicIpAddressName: agwPublicIpAddressName
   wafPolicyName: getResourceName('webApplicationFirewallPolicy', environmentName, location, instanceId)
 }
@@ -113,6 +114,8 @@ module appGateway 'modules/application-gateway.bicep' = if (includeApplicationGa
     applicationGatewaySettings: applicationGatewaySettings
     subnetId: virtualNetwork!.outputs.agwSubnetId
     apiManagementServiceName: apiManagementSettings.serviceName
+    appInsightsName: appInsightsName
+    keyVaultName: keyVaultName
     logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
   }
 }

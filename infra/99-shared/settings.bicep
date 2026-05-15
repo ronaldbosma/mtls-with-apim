@@ -48,6 +48,9 @@ type applicationGatewaySettingsType = {
   @description('The name of the Application Gateway')
   applicationGatewayName: string
 
+  @description('The name of the user-assigned managed identity for the Application Gateway')
+  identityName: string
+
   @description('The name of the public IP address for the Application Gateway')
   publicIpAddressName: string
 
