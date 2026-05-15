@@ -31,21 +31,36 @@ if ($LASTEXITCODE -ne 0) {
 $currentScriptPath = $MyInvocation.MyCommand.Path | Split-Path -Parent
 $certificatesPath = Join-Path $currentScriptPath "..\..\..\self-signed-certificates\certificates"
 
+
 # DISCLAIMER: Hardcoding passwords is only acceptable for local development and demo purposes.
 # In real-world scenarios, never hardcode passwords or commit certificates with private keys to source control.
 # Use proper secret/certificate management solutions instead.
 $certificatePassword = "P@ssw0rd"
 
 
-Write-Host "Importing certificates into Azure Key Vault '$KeyVaultName'"
+$certificatesToImport = @(
+    "dev-expired-client.pfx",
+    "dev-notyetvalid-client.pfx",
+    "dev-unprotected-api.pfx",
+    "dev-unregistered-client.pfx",
+    "dev-valid-client.pfx",
+    "tst-untrusted-client.pfx"
+)
 
-az keyvault certificate import `
-    --file (Join-Path $certificatesPath "dev-unprotected-api.pfx") `
-    --name "dev-unprotected-api" `
-    --vault-name $KeyVaultName `
-    --password $certificatePassword `
-    --output none
+foreach ($certificateFileName in $certificatesToImport) {
+    $certificateName = [System.IO.Path]::GetFileNameWithoutExtension($certificateFileName)
+    $certificateFilePath = Join-Path $certificatesPath $certificateFileName
 
-if ($LASTEXITCODE -ne 0) {
-    throw "Failed to import certificate 'dev-unprotected-api' into Key Vault '$KeyVaultName'."
+    Write-Host "Importing certificate '$certificateName' from '$certificateFilePath' into Azure Key Vault '$KeyVaultName'"
+
+    az keyvault certificate import `
+        --file $certificateFilePath `
+        --name $certificateName `
+        --vault-name $KeyVaultName `
+        --password $certificatePassword `
+        --output none
+
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to import certificate '$certificateName' into Key Vault '$KeyVaultName'."
+    }
 }
