@@ -300,6 +300,30 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2025-05-01' =
 
     // Rules
 
+    rewriteRuleSets: [
+      {
+        name: 'mtls-rewrite-rules'
+        properties: {
+          rewriteRules: [
+            {
+              ruleSequence: 100
+              conditions: []
+              name: 'Add Client certificate to HTTP header'
+              actionSet: {
+                requestHeaderConfigurations: [
+                  {
+                    headerName: 'X-ARR-ClientCert'
+                    headerValue: '{var_client_certificate}'
+                  }
+                ]
+                responseHeaderConfigurations: []
+              }
+            }
+          ]
+        }
+      }
+    ]
+
     requestRoutingRules: [
       {
         name: 'apim-https-routing-rule'
@@ -339,6 +363,13 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2025-05-01' =
               'Microsoft.Network/applicationGateways/httpListeners',
               applicationGatewayName,
               'mtls-listener'
+            )
+          }
+          rewriteRuleSet: {
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/rewriteRuleSets',
+              applicationGatewayName,
+              'mtls-rewrite-rules'
             )
           }
           backendAddressPool: {
