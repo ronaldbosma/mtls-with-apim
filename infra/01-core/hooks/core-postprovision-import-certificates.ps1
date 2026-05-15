@@ -38,8 +38,12 @@ $certificatesPath = Join-Path $currentScriptPath "..\..\..\self-signed-certifica
 $certificatePassword = "P@ssw0rd"
 
 
+# =====================================================================
+# Import certificates into Azure Key Vault
+# =====================================================================
+
+# List of certificates to import as certificates (excluding expired)
 $certificatesToImport = @(
-    "dev-expired-client.pfx",
     "dev-notyetvalid-client.pfx",
     "dev-unprotected-api.pfx",
     "dev-unregistered-client.pfx",
@@ -63,4 +67,29 @@ foreach ($certificateFileName in $certificatesToImport) {
     if ($LASTEXITCODE -ne 0) {
         throw "Failed to import certificate '$certificateName' into Key Vault '$KeyVaultName'."
     }
+}
+
+
+# =====================================================================
+# Store expired certificates into Azure Key Vault as secrets
+# (importing expired certificates in Key Vault fails)
+# =====================================================================
+
+$expiredCertFileName = "dev-expired-client.pfx"
+$expiredCertName = [System.IO.Path]::GetFileNameWithoutExtension($expiredCertFileName)
+$expiredCertFilePath = Join-Path $certificatesPath $expiredCertFileName
+
+Write-Host "Storing expired certificate '$expiredCertName' from '$expiredCertFilePath' as a plain secret in Azure Key Vault '$KeyVaultName'"
+
+$expiredCertBytes = [System.IO.File]::ReadAllBytes($expiredCertFilePath)
+$expiredCertBase64 = [Convert]::ToBase64String($expiredCertBytes)
+
+az keyvault secret set `
+    --vault-name $KeyVaultName `
+    --name $expiredCertName `
+    --value $expiredCertBase64 `
+    --output none
+
+if ($LASTEXITCODE -ne 0) {
+    throw "Failed to store expired certificate '$expiredCertName' as a secret in Key Vault '$KeyVaultName'."
 }
