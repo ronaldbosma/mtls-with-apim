@@ -71,6 +71,18 @@ public class ApplicationGatewayTests
     }
 
 
+    [TestMethod]
+    public async Task ValidateFromAgw_AgwMtlsEndpoint_ValidClientCertificate_200OkReturned()
+    {
+        // Arrange
+        using var agwClient = new IntegrationTestHttpClient(Config.ApplicationGatewayIpAddress!, 53029, Config.ApplicationGatewayHostname!, s_validClientCertificate);
+
+        // Act
+        var response = await agwClient.GetAsync("protected/validate-from-agw");
+
+        // Assert
+        Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+    }
 
     /// <summary>
     /// Even though a valid client certificate is provided, a 401 Unauthorized response is expected because the Application Gateway terminates the TLS connection.
