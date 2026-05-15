@@ -38,6 +38,12 @@ param keyVaultName string
 param logAnalyticsWorkspaceName string
 
 //=============================================================================
+// Variables
+//=============================================================================
+
+var applicationGatewayName string = applicationGatewaySettings.applicationGatewayName
+
+//=============================================================================
 // Existing Resources
 //=============================================================================
 
@@ -82,7 +88,7 @@ module assignRolesToAgwUserAssignedIdentity '../../99-shared/assign-roles-to-pri
 // Application Gateway
 
 resource applicationGateway 'Microsoft.Network/applicationGateways@2025-05-01' = {
-  name: applicationGatewaySettings.applicationGatewayName
+  name: applicationGatewayName
   location: location
   tags: tags
 
@@ -155,21 +161,17 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2025-05-01' =
           frontendIPConfiguration: {
             id: resourceId(
               'Microsoft.Network/applicationGateways/frontendIPConfigurations',
-              applicationGatewaySettings.applicationGatewayName,
+              applicationGatewayName,
               'agw-public-frontend-ip'
             )
           }
           frontendPort: {
-            id: resourceId(
-              'Microsoft.Network/applicationGateways/frontendPorts',
-              applicationGatewaySettings.applicationGatewayName,
-              'port-https'
-            )
+            id: resourceId('Microsoft.Network/applicationGateways/frontendPorts', applicationGatewayName, 'port-https')
           }
           sslCertificate: {
             id: resourceId(
               'Microsoft.Network/applicationGateways/sslCertificates',
-              applicationGatewaySettings.applicationGatewayName,
+              applicationGatewayName,
               'agw-ssl-certificate'
             )
           }
@@ -221,11 +223,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2025-05-01' =
           hostName: getApiManagementFqdn(apiManagementServiceName)
           requestTimeout: 20
           probe: {
-            id: resourceId(
-              'Microsoft.Network/applicationGateways/probes',
-              applicationGatewaySettings.applicationGatewayName,
-              'apim-gateway-probe'
-            )
+            id: resourceId('Microsoft.Network/applicationGateways/probes', applicationGatewayName, 'apim-gateway-probe')
           }
         }
       }
@@ -242,21 +240,21 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2025-05-01' =
           httpListener: {
             id: resourceId(
               'Microsoft.Network/applicationGateways/httpListeners',
-              applicationGatewaySettings.applicationGatewayName,
+              applicationGatewayName,
               'https-listener'
             )
           }
           backendAddressPool: {
             id: resourceId(
               'Microsoft.Network/applicationGateways/backendAddressPools',
-              applicationGatewaySettings.applicationGatewayName,
+              applicationGatewayName,
               'apim-gateway-backend-pool'
             )
           }
           backendHttpSettings: {
             id: resourceId(
               'Microsoft.Network/applicationGateways/backendHttpSettingsCollection',
-              applicationGatewaySettings.applicationGatewayName,
+              applicationGatewayName,
               'apim-gateway-backend-settings'
             )
           }
@@ -270,7 +268,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2025-05-01' =
 
 #disable-next-line use-recent-api-versions // There isn't a newer version at the moment
 resource applicationGatewayDiagnosticSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
-  name: '${applicationGatewaySettings.applicationGatewayName}-diagnostics'
+  name: '${applicationGatewayName}-diagnostics'
   scope: applicationGateway
   properties: {
     workspaceId: logAnalyticsWorkspace.id
