@@ -1,3 +1,5 @@
+using System.Net;
+
 using Microsoft.Extensions.Configuration;
 
 namespace IntegrationTests.Configuration;
@@ -11,6 +13,10 @@ internal class TestConfiguration
     public required Uri AzureKeyVaultUri { get; init; }
     public required bool CertificateChainIsValidatedInProtectedApi { get; init; }
 
+    public required bool IsApplicationGatewayIncluded { get; init; }
+    public string? ApplicationGatewayHostname { get; init; }
+    public IPAddress? ApplicationGatewayIpAddress { get; init; }
+
     public static TestConfiguration Load()
     {
         AzdDotEnv.Load(optional: true); // Loads Azure Developer CLI environment variables; optional since .env file might be missing in CI/CD pipelines
@@ -19,11 +25,17 @@ internal class TestConfiguration
             .AddEnvironmentVariables()
             .Build();
 
+        var isApplicationGatewayIncluded = configuration.GetRequiredBool("INCLUDE_APPLICATION_GATEWAY");
+
         return new TestConfiguration
         {
             AzureApiManagementGatewayUrl = configuration.GetRequiredUri("AZURE_API_MANAGEMENT_GATEWAY_URL"),
             AzureKeyVaultUri = configuration.GetRequiredUri("AZURE_KEY_VAULT_URI"),
-            CertificateChainIsValidatedInProtectedApi = configuration.GetRequiredBool("VALIDATE_CERTIFICATE_CHAIN_IN_PROTECTED_API")
+            CertificateChainIsValidatedInProtectedApi = configuration.GetRequiredBool("VALIDATE_CERTIFICATE_CHAIN_IN_PROTECTED_API"),
+
+            IsApplicationGatewayIncluded = isApplicationGatewayIncluded,
+            ApplicationGatewayHostname = isApplicationGatewayIncluded ? configuration.GetRequiredString("AZURE_APPLICATION_GATEWAY_NAME") : null,
+            ApplicationGatewayIpAddress = isApplicationGatewayIncluded ? configuration.GetRequiredIPAddress("AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_VALUE") : null,
         };
     }
 }
