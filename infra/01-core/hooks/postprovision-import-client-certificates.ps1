@@ -1,6 +1,6 @@
 <#
   This PowerShell script is executed after the core layer is provisioned.
-  It will import certificates into Azure Key Vault.
+  It will import client certificates into Azure Key Vault.
 #>
 
 param(

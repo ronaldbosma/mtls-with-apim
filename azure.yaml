@@ -10,7 +10,7 @@ infra:
       hooks:
         postprovision:
           shell: pwsh
-          run: ./hooks/core-postprovision-import-certificates.ps1
+          run: ./hooks/postprovision-import-client-certificates.ps1
     - name: platform
       path: ./infra/02-platform
     - name: application

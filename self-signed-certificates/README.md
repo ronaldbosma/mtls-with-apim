@@ -40,4 +40,4 @@ You can also provide the password explicitly:
 ./generate-client-certificates.ps1 -CertificatePassword (Read-Host "Certificate password" -AsSecureString)
 ```
 
-If you generate the certificate tree with a different password, make sure to update [/infra/01-core/hooks/core-postprovision-import-certificates.ps1](../infra/01-core/hooks/core-postprovision-import-certificates.ps1).
+If you generate the certificate tree with a different password, make sure to update the `$certificatePassword` variable in [/infra/01-core/hooks/postprovision-import-client-certificates.ps1](../infra/01-core/hooks/postprovision-import-client-certificates.ps1).

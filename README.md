@@ -167,7 +167,7 @@ This template has several hooks that are executed at different stages of the dep
 
 These PowerShell scripts are executed after the the core layer is provisioned.
 
-- [core-postprovision-import-certificates.ps1](infra/01-core/hooks/core-postprovision-import-certificates.ps1):  
+- [postprovision-import-client-certificates.ps1](infra/01-core/hooks/postprovision-import-client-certificates.ps1):  
   This script imports the necessary certificates into Key Vault.
 
 ## Pipeline
@@ -318,17 +318,17 @@ If you've regenerated the certificate tree with your own password, you might get
 (BadParameter) The specified PKCS#12 X.509 certificate content can not be read. Please check if certificate is in valid PKCS#12 format.
 Code: BadParameter
 Message: The specified PKCS#12 X.509 certificate content can not be read. Please check if certificate is in valid PKCS#12 format.
-Exception: ...\infra\01-core\hooks\core-postprovision-import-certificates.ps1:50:5
+Exception: ...\infra\01-core\hooks\postprovision-import-client-certificates.ps1:50:5
 Line |
   50 |      throw "Failed to import certificate 'dev-unprotected-api' into Ke …
      |      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
      | Failed to import certificate 'dev-unprotected-api' into Key Vault 'kvmtlsapimsdcj767o'.
 
 ERROR: deployment failed: layer 'core': failed running post hooks: 'postprovision' hook failed with exit code: '1', 
-       Path: '...\infra\01-core\hooks\core-postprovision-import-certificates.ps1'. : exit code: 1
+       Path: '...\infra\01-core\hooks\postprovision-import-client-certificates.ps1'. : exit code: 1
 ```
 
-Change the password in [./infra/01-core/hooks/core-postprovision-import-certificates.ps1](./infra/01-core/hooks/core-postprovision-import-certificates.ps1) to successfully import the certificate(s).
+Change the password in [./infra/01-core/hooks/postprovision-import-client-certificates.ps1](./infra/01-core/hooks/postprovision-import-client-certificates.ps1) to successfully import the certificate(s).
 
 ### Invalid certificate data. Certificate data should contain a valid Base64Encoded string
 
