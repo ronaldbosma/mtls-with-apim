@@ -157,7 +157,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2025-05-01' =
         name: 'https-listener'
         properties: {
           protocol: 'Https'
-          hostName: 'agw-sample.dev'
+          hostName: applicationGatewayName
           frontendIPConfiguration: {
             id: resourceId(
               'Microsoft.Network/applicationGateways/frontendIPConfigurations',
