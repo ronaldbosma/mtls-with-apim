@@ -1,0 +1,61 @@
+<policies>
+    <inbound>
+        <base />
+
+        <return-response>
+            <set-status code="200" />
+            <set-header name="Content-Type" exists-action="override">
+                <value>application/json</value>
+            </set-header>
+            <set-body>@{
+                string clientCertHeader = context.Request.Headers.GetValueOrDefault("X-ARR-ClientCert");
+                X509Certificate2 certificate = null;
+
+                if (!string.IsNullOrWhiteSpace(clientCertHeader))
+                {
+                    // Decode the header value (e.g. replace %20 with a whitespace) and remove the begin and end certificate markers.
+                    // The result is the base64 encoded certificate in X.509 (.cer) format without the private key.
+                    var pem = System.Net.WebUtility.UrlDecode(clientCertHeader)
+                                                   .Replace("-----BEGIN CERTIFICATE-----", "")
+                                                   .Replace("-----END CERTIFICATE-----", "");
+
+                    certificate = new X509Certificate2(Convert.FromBase64String(pem));
+                }
+
+                return JsonConvert.SerializeObject(new
+                {
+                    certificate = new
+                    {
+                        details = certificate?.ToString(),
+                        header = clientCertHeader
+                    },
+                    request = new {
+                        headers = string.Join(",", context.Request.Headers.Keys.OrderBy(s => s))
+                    }
+                });
+            }</set-body>
+        </return-response>
+    </inbound>
+
+    <backend>
+        <base />
+    </backend>
+
+    <outbound>
+        <base />
+    </outbound>
+
+    <on-error>
+        <!-- Include error details in the response headers. Don't expose sensitive information in production. -->
+        <set-header name="ErrorSource" exists-action="override">
+            <value>@(context.LastError.Source)</value>
+        </set-header>
+        <set-header name="ErrorReason" exists-action="override">
+            <value>@(context.LastError.Reason)</value>
+        </set-header>
+        <set-header name="ErrorMessage" exists-action="override">
+            <value>@(context.LastError.Message)</value>
+        </set-header>
+        <base />
+    </on-error>
+</policies>
