@@ -63,7 +63,7 @@ internal class KeyVaultClient
         return await GetCertificateInternalAsync(secretName, password);
     }
 
-    public async Task<X509Certificate2> GetCertificateInternalAsync(string secretName, string password)
+    private async Task<X509Certificate2> GetCertificateInternalAsync(string secretName, string password)
     {
         var base64Pfx = await GetSecretValueAsync(secretName);
         var pfxBytes = Convert.FromBase64String(base64Pfx);
