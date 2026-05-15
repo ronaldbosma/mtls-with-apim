@@ -39,29 +39,19 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2025-07
   name: logAnalyticsWorkspaceName
 }
 
+resource agwPublicIPAddress 'Microsoft.Network/publicIPAddresses@2025-05-01' existing = {
+  name: applicationGatewaySettings.publicIpAddressName
+}
+
 //=============================================================================
 // Resources
 //=============================================================================
 
 // Public IP address
 
-resource agwPublicIPAddress 'Microsoft.Network/publicIPAddresses@2024-10-01' = {
-  name: applicationGatewaySettings.publicIpAddressName
-  location: location
-  tags: tags
-  sku: {
-    name: 'Standard'
-  }
-  properties: {
-    publicIPAddressVersion: 'IPv4'
-    publicIPAllocationMethod: 'Static'
-    idleTimeoutInMinutes: 4
-  }
-}
-
 // Application Gateway
 
-resource applicationGateway 'Microsoft.Network/applicationGateways@2024-10-01' = {
+resource applicationGateway 'Microsoft.Network/applicationGateways@2025-05-01' = {
   name: applicationGatewaySettings.applicationGatewayName
   location: location
   tags: tags
