@@ -32,10 +32,26 @@ $currentScriptPath = $MyInvocation.MyCommand.Path | Split-Path -Parent
 $certificatesPath = Join-Path $currentScriptPath "..\..\..\self-signed-certificates\certificates"
 
 
+# =====================================================================
+# Store the client certificate password in Azure Key Vault
+# =====================================================================
+
 # DISCLAIMER: Hardcoding passwords is only acceptable for local development and demo purposes.
 # In real-world scenarios, never hardcode passwords or commit certificates with private keys to source control.
 # Use proper secret/certificate management solutions instead.
 $certificatePassword = "P@ssw0rd"
+
+Write-Host "Storing client certificate password as a secret in Azure Key Vault '$KeyVaultName'"
+
+az keyvault secret set `
+    --vault-name $KeyVaultName `
+    --name "client-certificate-password" `
+    --value $certificatePassword `
+    --output none
+
+if ($LASTEXITCODE -ne 0) {
+    throw "Failed to store client certificate password as a secret in Key Vault '$KeyVaultName'."
+}
 
 
 # =====================================================================
