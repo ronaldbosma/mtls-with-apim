@@ -1,3 +1,5 @@
+using System.Security.Cryptography.X509Certificates;
+
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 
@@ -30,5 +32,23 @@ internal class KeyVaultClient
     {
         var secret = await _secretClient.GetSecretAsync(secretName);
         return secret.Value.Value;
+    }
+
+    /// <summary>
+    /// Retrieves a PKCS#12 certificate from Azure Key Vault and loads it as an <see cref="X509Certificate2"/>.
+    /// </summary>
+    /// <param name="secretName">The name of the secret containing the base64-encoded PFX.</param>
+    /// <returns>The loaded certificate.</returns>
+    public async Task<X509Certificate2> GetCertificateAsync(string secretName)
+    {
+        var base64Pfx = await GetSecretValueAsync(secretName);
+        var pfxBytes = Convert.FromBase64String(base64Pfx);
+
+        var keyStorageFlags = X509KeyStorageFlags.UserKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable;
+
+        return X509CertificateLoader.LoadPkcs12(
+            pfxBytes,
+            string.Empty,
+            keyStorageFlags);
     }
 }
