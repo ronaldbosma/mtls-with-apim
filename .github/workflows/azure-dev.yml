@@ -198,12 +198,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write # Required to fetch an OIDC token for Azure authentication
-      contents: read # Required to checkout code if needed
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v5
         with:
@@ -234,7 +230,6 @@ jobs:
           AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_VALUE: ${{ needs.deploy.outputs.AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_VALUE }}
           AZURE_KEY_VAULT_URI: ${{ needs.deploy.outputs.AZURE_KEY_VAULT_URI }}
           VALIDATE_CERTIFICATE_CHAIN_IN_PROTECTED_API: ${{ needs.deploy.outputs.VALIDATE_CERTIFICATE_CHAIN_IN_PROTECTED_API }}
-          DIRECTORY_WITH_CLIENT_CERTIFICATES: "${{ github.workspace }}/self-signed-certificates/certificates"
 
       - name: Upload Test Results
         if: always()
