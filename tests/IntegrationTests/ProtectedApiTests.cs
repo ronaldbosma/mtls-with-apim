@@ -13,20 +13,31 @@ namespace IntegrationTests;
 public sealed class ProtectedApiTests
 {
     private static readonly TestConfiguration Config = TestConfiguration.Load();
-    private static readonly X509Certificate2 ValidClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/dev-valid-client.pfx", "P@ssw0rd");
-    private static readonly X509Certificate2 UnregisteredClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/dev-unregistered-client.pfx", "P@ssw0rd");
-    private static readonly X509Certificate2 UntrustedClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/tst-untrusted-client.pfx", "P@ssw0rd");
-    private static readonly X509Certificate2 ExpiredClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/dev-expired-client.pfx", "P@ssw0rd");
-    private static readonly X509Certificate2 NotYetValidClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/dev-notyetvalid-client.pfx", "P@ssw0rd");
+    private static X509Certificate2? s_validClientCertificate;
+    private static X509Certificate2? s_unregisteredClientCertificate;
+    private static X509Certificate2? s_untrustedClientCertificate;
+    private static X509Certificate2? s_expiredClientCertificate;
+    private static X509Certificate2? s_notYetValidClientCertificate;
+
+    [ClassInitialize]
+    public static async Task ClassInitialize(TestContext context)
+    {
+        var keyVaultClient = new KeyVaultClient(Config.AzureKeyVaultUri);
+        s_validClientCertificate = await keyVaultClient.GetCertificateAsync("dev-valid-client");
+        s_unregisteredClientCertificate = await keyVaultClient.GetCertificateAsync("dev-unregistered-client");
+        s_untrustedClientCertificate = await keyVaultClient.GetCertificateAsync("tst-untrusted-client");
+        s_expiredClientCertificate = await keyVaultClient.GetCertificateAsync("dev-expired-client", passwordSecretName: "client-certificate-password");
+        s_notYetValidClientCertificate = await keyVaultClient.GetCertificateAsync("dev-notyetvalid-client");
+    }
 
     [ClassCleanup]
     public static void ClassCleanup()
     {
-        ValidClientCertificate.Dispose();
-        UnregisteredClientCertificate.Dispose();
-        UntrustedClientCertificate.Dispose();
-        ExpiredClientCertificate.Dispose();
-        NotYetValidClientCertificate.Dispose();
+        s_validClientCertificate?.Dispose();
+        s_unregisteredClientCertificate?.Dispose();
+        s_untrustedClientCertificate?.Dispose();
+        s_expiredClientCertificate?.Dispose();
+        s_notYetValidClientCertificate?.Dispose();
     }
 
     /// <remarks>
@@ -36,7 +47,7 @@ public sealed class ProtectedApiTests
     public async Task ValidateUsingPolicy_ValidClientCertificateProvided_200OkReturned()
     {
         // Arrange
-        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, ValidClientCertificate);
+        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, s_validClientCertificate!);
 
         // Act
         var response = await apimClient.GetAsync("protected/validate-using-policy");
@@ -69,7 +80,7 @@ public sealed class ProtectedApiTests
     public async Task ValidateUsingPolicy_UnregisteredClientCertificateProvided_401UnauthorizedReturned()
     {
         // Arrange
-        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, UnregisteredClientCertificate);
+        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, s_unregisteredClientCertificate!);
 
         // Act
         var response = await apimClient.GetAsync("protected/validate-using-policy");
@@ -86,7 +97,7 @@ public sealed class ProtectedApiTests
     public async Task ValidateUsingPolicy_UntrustedClientCertificateProvided_401UnauthorizedReturned()
     {
         // Arrange
-        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, UntrustedClientCertificate);
+        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, s_untrustedClientCertificate!);
 
         // Act
         var response = await apimClient.GetAsync("protected/validate-using-policy");
@@ -105,7 +116,7 @@ public sealed class ProtectedApiTests
     public async Task ValidateUsingPolicy_ExpiredClientCertificateProvided_401UnauthorizedReturned()
     {
         // Arrange
-        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, ExpiredClientCertificate);
+        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, s_expiredClientCertificate!);
 
         // Act
         var response = await apimClient.GetAsync("protected/validate-using-policy");
@@ -122,7 +133,7 @@ public sealed class ProtectedApiTests
     public async Task ValidateUsingPolicy_NotYetValidClientCertificateProvided_401UnauthorizedReturned()
     {
         // Arrange
-        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, NotYetValidClientCertificate);
+        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, s_notYetValidClientCertificate!);
 
         // Act
         var response = await apimClient.GetAsync("protected/validate-using-policy");
@@ -142,7 +153,7 @@ public sealed class ProtectedApiTests
     public async Task ValidateUsingContext_ValidClientCertificateProvided_200OkReturned()
     {
         // Arrange
-        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, ValidClientCertificate);
+        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, s_validClientCertificate!);
 
         // Act
         var response = await apimClient.GetAsync("protected/validate-using-context");
@@ -173,7 +184,7 @@ public sealed class ProtectedApiTests
     public async Task ValidateUsingContext_UnregisteredClientCertificateProvided_401UnauthorizedReturned()
     {
         // Arrange
-        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, UnregisteredClientCertificate);
+        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, s_unregisteredClientCertificate!);
 
         // Act
         var response = await apimClient.GetAsync("protected/validate-using-context");
@@ -188,7 +199,7 @@ public sealed class ProtectedApiTests
     public async Task ValidateUsingContext_UntrustedClientCertificateProvided_401UnauthorizedReturned()
     {
         // Arrange
-        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, UntrustedClientCertificate);
+        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, s_untrustedClientCertificate!);
 
         // Act
         var response = await apimClient.GetAsync("protected/validate-using-context");
@@ -205,7 +216,7 @@ public sealed class ProtectedApiTests
     public async Task ValidateUsingContext_ExpiredClientCertificateProvided_401UnauthorizedReturned()
     {
         // Arrange
-        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, ExpiredClientCertificate);
+        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, s_expiredClientCertificate!);
 
         // Act
         var response = await apimClient.GetAsync("protected/validate-using-context");
@@ -220,7 +231,7 @@ public sealed class ProtectedApiTests
     public async Task ValidateUsingContext_NotYetValidClientCertificateProvided_401UnauthorizedReturned()
     {
         // Arrange
-        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, NotYetValidClientCertificate);
+        using var apimClient = new IntegrationTestHttpClient(Config.AzureApiManagementGatewayUrl, s_notYetValidClientCertificate!);
 
         // Act
         var response = await apimClient.GetAsync("protected/validate-using-context");
