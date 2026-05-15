@@ -16,7 +16,7 @@ public sealed class ProtectedApiTests
     private static X509Certificate2? s_validClientCertificate;
     private static X509Certificate2? s_unregisteredClientCertificate;
     private static X509Certificate2? s_untrustedClientCertificate;
-    private static X509Certificate2? s_expiredClientCertificate = X509CertificateLoader.LoadPkcs12FromFile($"{Config.DirectoryWithClientCertificates}/dev-expired-client.pfx", "P@ssw0rd");
+    private static X509Certificate2? s_expiredClientCertificate;
     private static X509Certificate2? s_notYetValidClientCertificate;
 
     [ClassInitialize]
@@ -26,7 +26,7 @@ public sealed class ProtectedApiTests
         s_validClientCertificate = await keyVaultClient.GetCertificateAsync("dev-valid-client");
         s_unregisteredClientCertificate = await keyVaultClient.GetCertificateAsync("dev-unregistered-client");
         s_untrustedClientCertificate = await keyVaultClient.GetCertificateAsync("tst-untrusted-client");
-        //s_expiredClientCertificate = await keyVaultClient.GetCertificateAsync("dev-expired-client");
+        s_expiredClientCertificate = await keyVaultClient.GetCertificateAsync("dev-expired-client", passwordSecretName: "client-certificate-password");
         s_notYetValidClientCertificate = await keyVaultClient.GetCertificateAsync("dev-notyetvalid-client");
     }
 

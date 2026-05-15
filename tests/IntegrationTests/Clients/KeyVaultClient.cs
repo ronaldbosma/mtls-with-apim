@@ -39,7 +39,31 @@ internal class KeyVaultClient
     /// </summary>
     /// <param name="secretName">The name of the secret containing the base64-encoded PFX.</param>
     /// <returns>The loaded certificate.</returns>
-    public async Task<X509Certificate2> GetCertificateAsync(string secretName)
+    public Task<X509Certificate2> GetCertificateAsync(string secretName)
+    {
+        // When using `az keyvault certificate import` to import a certificate into Key Vault, the PFX is stored without a password.
+        // In this case, we can pass an empty string as the password to load the certificate.
+        var password = string.Empty;
+
+        return GetCertificateInternalAsync(secretName, password);
+    }
+
+    /// <summary>
+    /// Retrieves a PKCS#12 certificate from Azure Key Vault and loads it as an <see cref="X509Certificate2"/>.
+    /// </summary>
+    /// <param name="secretName">The name of the secret containing the base64-encoded PFX.</param>
+    /// <param name="passwordSecretName">The name of the secret containing the password for the PFX.</param>
+    /// <returns>The loaded certificate.</returns>
+    public async Task<X509Certificate2> GetCertificateAsync(string secretName, string passwordSecretName)
+    {
+        // When using `az keyvault secret set` to store a PFX in Key Vault, the PFX is typically protected with a password.
+        // In this case, we need to retrieve the password from Key Vault and use it to load the certificate.
+        var password = await GetSecretValueAsync(passwordSecretName);
+
+        return await GetCertificateInternalAsync(secretName, password);
+    }
+
+    public async Task<X509Certificate2> GetCertificateInternalAsync(string secretName, string password)
     {
         var base64Pfx = await GetSecretValueAsync(secretName);
         var pfxBytes = Convert.FromBase64String(base64Pfx);
@@ -48,7 +72,7 @@ internal class KeyVaultClient
 
         return X509CertificateLoader.LoadPkcs12(
             pfxBytes,
-            string.Empty,
+            password,
             keyStorageFlags);
     }
 }
