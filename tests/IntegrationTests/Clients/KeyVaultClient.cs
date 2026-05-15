@@ -68,7 +68,10 @@ internal class KeyVaultClient
         var base64Pfx = await GetSecretValueAsync(secretName);
         var pfxBytes = Convert.FromBase64String(base64Pfx);
 
-        var keyStorageFlags = X509KeyStorageFlags.UserKeySet | X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable;
+        // EphemeralKeySet is more secure but doesn't seem to work on Windows.
+        var keyStorageFlags = OperatingSystem.IsWindows()
+            ? X509KeyStorageFlags.UserKeySet | X509KeyStorageFlags.PersistKeySet
+            : X509KeyStorageFlags.EphemeralKeySet;
 
         return X509CertificateLoader.LoadPkcs12(
             pfxBytes,
