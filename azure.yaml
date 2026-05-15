@@ -9,8 +9,10 @@ infra:
       path: ./infra/01-core
       hooks:
         postprovision:
-          shell: pwsh
-          run: ./hooks/postprovision-import-client-certificates.ps1
+          - shell: pwsh
+            run: ./hooks/postprovision-create-agw-server-certificate.ps1
+          - shell: pwsh
+            run: ./hooks/postprovision-import-client-certificates.ps1
     - name: platform
       path: ./infra/02-platform
     - name: application
