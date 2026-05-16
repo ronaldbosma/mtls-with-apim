@@ -357,7 +357,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2025-05-01' =
       {
         name: 'apim-mtls-routing-rule'
         properties: {
-          priority: 30
+          priority: 20
           ruleType: 'Basic'
           httpListener: {
             id: resourceId(
