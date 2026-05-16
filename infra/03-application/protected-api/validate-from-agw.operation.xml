@@ -1,0 +1,105 @@
+<policies>
+	<inbound>
+		<base />
+
+		<choose>
+            <!-- Check if the client certificate header is missing -->
+			<when condition="@(string.IsNullOrWhiteSpace(context.Request.Headers.GetValueOrDefault("X-Client-Certificate")))">
+				<set-variable name="certificateValidationResult" value="ClientCertificateNotFound" />
+			</when>
+
+            <otherwise>
+				<!-- Extract the client certificate from the header, parse it and store the value in a variable -->
+				<set-variable name="clientCertificate" value="@{
+                    var clientCertHeader = context.Request.Headers.GetValueOrDefault("X-Client-Certificate");
+
+                    // Decode the header value (e.g. replace %20 with a whitespace) and remove the begin and end certificate markers.
+                    // The result is the base64 encoded certificate in X.509 (.cer) format without the private key.
+                    var pem = System.Net.WebUtility.UrlDecode(clientCertHeader)
+                                                   .Replace("-----BEGIN CERTIFICATE-----", "")
+                                                   .Replace("-----END CERTIFICATE-----", "");
+
+                    // We can't store a certificate as type X509Certificate2, so we store the byte array that can be used to instantiate a X509Certificate2.
+                    return Convert.FromBase64String(pem);
+                }" />
+
+				<!-- Determine if the client certificate is valid and store the reason in a variable -->
+				<set-variable name="certificateValidationResult" value="@{
+                    var certificate = new X509Certificate2(context.Variables.GetValueOrDefault<byte[]>("clientCertificate"));
+
+                    var now = DateTime.Now; // We are using DateTime.Now because NotBefore and NotAfter are in local time
+                    if (certificate.NotBefore > now)
+                    {
+                        return "ClientCertificateNotYetValid";
+                    }
+                    if (certificate.NotAfter < now)
+                    {
+                        return "ClientCertificateExpired";
+                    }
+
+                    if ({{validate-certificate-chain}} && !certificate.VerifyNoRevocation())
+                    {
+                        return "ClientCertificateNotTrusted";
+                    }
+
+                    if (!context.Deployment.Certificates.Any(c => c.Value.Thumbprint == certificate.Thumbprint))
+                    {
+                        return "ClientCertificateIdentityNotMatched";
+                    }
+
+                    return null;
+                }" />
+			</otherwise>
+		</choose>
+
+		<choose>
+			<!-- Trace and return a 401 Unauthorized if the client certificate is not valid -->
+			<when condition="@(context.Variables.GetValueOrDefault<string>("certificateValidationResult") != null)">
+				<trace source="validate-from-agw" severity="error">
+					<message>@("Client certificate validation failed: " + context.Variables.GetValueOrDefault<string>("certificateValidationResult"))</message>
+				</trace>
+                <return-response>
+                    <!-- Include error reason for demo purposes. Don't expose sensitive information in production and use a generic error message instead. -->
+                    <set-status code="401" reason='@(context.Variables.GetValueOrDefault<string>("certificateValidationResult"))' />
+                    <set-header name="X-Client-Certificate-Received-By-APIM" exists-action="override">
+                        <value>@(context.Request.Headers.GetValueOrDefault("X-Client-Certificate"))</value>
+                    </set-header>
+                </return-response>
+			</when>
+		</choose>
+
+        <!-- Returns a 200 OK with the client certificate details in the body -->
+		<return-response>
+			<set-status code="200" />
+            <set-header name="X-Client-Certificate-Received-By-APIM" exists-action="override">
+                <value>@(context.Request.Headers.GetValueOrDefault("X-Client-Certificate"))</value>
+            </set-header>
+			<set-body>@{
+                var certificate = new X509Certificate2(context.Variables.GetValueOrDefault<byte[]>("clientCertificate"));
+                return certificate.ToString();
+            }</set-body>
+		</return-response>
+	</inbound>
+
+    <backend>
+        <base />
+    </backend>
+
+    <outbound>
+        <base />
+    </outbound>
+
+    <on-error>
+        <!-- Include error details in the response headers. Don't expose sensitive information in production. -->
+        <set-header name="ErrorSource" exists-action="override">
+            <value>@(context.LastError.Source)</value>
+        </set-header>
+        <set-header name="ErrorReason" exists-action="override">
+            <value>@(context.LastError.Reason)</value>
+        </set-header>
+        <set-header name="ErrorMessage" exists-action="override">
+            <value>@(context.LastError.Message)</value>
+        </set-header>
+        <base />
+    </on-error>
+</policies>

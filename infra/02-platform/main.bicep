@@ -10,7 +10,12 @@ targetScope = 'subscription'
 
 import { getResourceName } from '../99-shared/naming-conventions.bicep'
 import { getTemplateTags } from '../99-shared/helpers.bicep'
-import { apiManagementSettingsType, applicationGatewaySettingsType, virtualNetworkSettingsType } from '../99-shared/settings.bicep'
+import {
+  apiManagementSettingsType
+  applicationGatewaySettingsType
+  applicationGatewayMtlsModeType
+  virtualNetworkSettingsType
+} from '../99-shared/settings.bicep'
 
 //=============================================================================
 // Parameters
@@ -51,6 +56,9 @@ param apiManagementSku 'Developer' | 'Basic' | 'Standard' | 'Premium' | 'BasicV2
 @description('Whether to include the Application Gateway in the deployment')
 param includeApplicationGateway bool
 
+@description('The mode to use for mTLS on the Application Gateway')
+param applicationGatewayMtlsMode applicationGatewayMtlsModeType
+
 //=============================================================================
 // Variables
 //=============================================================================
@@ -62,8 +70,9 @@ var apiManagementSettings apiManagementSettingsType = {
 
 var applicationGatewaySettings applicationGatewaySettingsType = {
   applicationGatewayName: getResourceName('applicationGateway', environmentName, location, instanceId)
+  identityName: getResourceName('managedIdentity', environmentName, location, 'agw-${instanceId}')
   publicIpAddressName: agwPublicIpAddressName
-  wafPolicyName: getResourceName('webApplicationFirewallPolicy', environmentName, location, instanceId)
+  mtlsMode: applicationGatewayMtlsMode
 }
 
 var virtualNetworkSettings virtualNetworkSettingsType = {
@@ -113,6 +122,8 @@ module appGateway 'modules/application-gateway.bicep' = if (includeApplicationGa
     applicationGatewaySettings: applicationGatewaySettings
     subnetId: virtualNetwork!.outputs.agwSubnetId
     apiManagementServiceName: apiManagementSettings.serviceName
+    appInsightsName: appInsightsName
+    keyVaultName: keyVaultName
     logAnalyticsWorkspaceName: logAnalyticsWorkspaceName
   }
 }
@@ -125,8 +136,9 @@ module appGateway 'modules/application-gateway.bicep' = if (includeApplicationGa
 output AZURE_API_MANAGEMENT_NAME string = apiManagementSettings.serviceName
 output AZURE_APPLICATION_GATEWAY_NAME string = applicationGatewaySettings.applicationGatewayName
 
-// Return the SKU of the API Management service
+// Return settings
 output AZURE_API_MANAGEMENT_SKU string = apiManagementSettings.sku
+output AZURE_APPLICATION_GATEWAY_MTLS_MODE string = includeApplicationGateway ? applicationGatewayMtlsMode : ''
 
 // Return resource endpoints
 output AZURE_API_MANAGEMENT_GATEWAY_URL string = apiManagement.outputs.gatewayUrl

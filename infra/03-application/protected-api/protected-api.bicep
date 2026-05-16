@@ -107,3 +107,26 @@ resource validateUsingContextOperation 'Microsoft.ApiManagement/service/apis/ope
     ]
   }
 }
+
+// Operation to validate client certificate received from Application Gateway
+resource validateFromAgwOperation 'Microsoft.ApiManagement/service/apis/operations@2025-03-01-preview' = {
+  name: 'validate-from-agw'
+  parent: protectedApi
+  properties: {
+    displayName: 'Validate (from Application Gateway)'
+    description: 'Validates client certificate received from Application Gateway'
+    method: 'GET'
+    urlTemplate: '/validate-from-agw'
+  }
+
+  resource policies 'policies' = {
+    name: 'policy'
+    properties: {
+      format: 'rawxml'
+      value: loadTextContent('./validate-from-agw.operation.xml')
+    }
+    dependsOn: [
+      validateCertificateChainNamedValue
+    ]
+  }
+}

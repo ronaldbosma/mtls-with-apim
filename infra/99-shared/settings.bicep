@@ -41,6 +41,9 @@ type appInsightsSettingsType = {
 }
 
 // Application Gateway
+@description('The mTLS mode of the Application Gateway')
+@export()
+type applicationGatewayMtlsModeType = 'Passthrough' | 'Strict'
 
 @description('The settings for the Application Gateway')
 @export()
@@ -48,11 +51,14 @@ type applicationGatewaySettingsType = {
   @description('The name of the Application Gateway')
   applicationGatewayName: string
 
+  @description('The name of the user-assigned managed identity for the Application Gateway')
+  identityName: string
+
   @description('The name of the public IP address for the Application Gateway')
   publicIpAddressName: string
 
-  @description('The name of the Web Application Firewall (WAF) policy')
-  wafPolicyName: string
+  @description('The mTLS mode of the Application Gateway')
+  mtlsMode: applicationGatewayMtlsModeType
 }
 
 // Virtual Network

@@ -31,6 +31,9 @@
     },
     "includeApplicationGateway": {
       "value": "${INCLUDE_APPLICATION_GATEWAY}"
+    },
+    "applicationGatewayMtlsMode": {
+      "value": "${AZURE_APPLICATION_GATEWAY_MTLS_MODE=Strict}"
     }
   }
 }

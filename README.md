@@ -135,6 +135,27 @@ azd env set INCLUDE_APPLICATION_GATEWAY false
 
 Note that the Application Gateway will not be removed if it's already deployed, this setting is disabled, and `azd up` or `azd provision` is executed again. You will need to manually remove the resources from the Azure portal or use `azd down --purge` to remove the entire environment.
 
+### Application Gateway mTLS Mode
+
+The mTLS mode for Application Gateway is configured through the `applicationGatewayMtlsMode` parameter in [main.parameters.json](/infra/02-platform/main.parameters.json). The default is `Strict`.
+
+Supported values:
+
+- `Strict`: Application Gateway enforces client certificate authentication during the TLS handshake by requiring a valid client certificate.
+- `Passthrough`: Application Gateway requests a client certificate during the TLS handshake but doesn't terminate the connection if the certificate is missing or invalid. The connection to the backend proceeds regardless of the certificate's presence or validity.
+
+To change the mode to `Passthrough`, run the following command before deploying the template:
+
+```cmd
+azd env set AZURE_APPLICATION_GATEWAY_MTLS_MODE Passthrough
+```
+
+If you have already deployed the template, redeploy the platform layer to apply the change:
+
+```cmd
+azd provision platform
+```
+
 ## Contents
 
 The repository consists of the following files and directories:
@@ -166,6 +187,9 @@ This template has several hooks that are executed at different stages of the dep
 ### Post-provision hooks - Core layer
 
 These PowerShell scripts are executed after the the core layer is provisioned.
+
+- [postprovision-create-agw-server-certificate.ps1](infra/01-core/hooks/postprovision-create-agw-server-certificate.ps1):  
+  This script creates a self-signed SSL server certificate for the IP address of the Application Gateway in Key Vault.
 
 - [postprovision-import-client-certificates.ps1](infra/01-core/hooks/postprovision-import-client-certificates.ps1):  
   This script imports the necessary certificates into Key Vault.

@@ -1,3 +1,5 @@
+using System.Net;
+
 using Microsoft.Extensions.Configuration;
 
 namespace IntegrationTests.Configuration;
@@ -10,6 +12,11 @@ internal static class IConfigurationExtensions
     public static Uri GetRequiredUri(this IConfiguration configuration, string key)
     {
         return new Uri(configuration.GetRequiredString(key));
+    }
+
+    public static IPAddress GetRequiredIPAddress(this IConfiguration configuration, string key)
+    {
+        return IPAddress.Parse(configuration.GetRequiredString(key));
     }
 
     public static string GetRequiredString(this IConfiguration configuration, string key)
