@@ -30,8 +30,9 @@ env:
   AZURE_LOCATION: ${{ vars.AZURE_LOCATION }}
   AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID || vars.AZURE_SUBSCRIPTION_ID }}
   AZURE_API_MANAGEMENT_SKU: ${{ vars.AZURE_API_MANAGEMENT_SKU || 'BasicV2' }}
-  AZURE_APPLICATION_GATEWAY_MTLS_MODE: ${{ vars.APPLICATION_GATEWAY_MTLS_MODE || 'Strict' }}
   INCLUDE_APPLICATION_GATEWAY: ${{ vars.INCLUDE_APPLICATION_GATEWAY || 'true' }}
+  AZURE_APPLICATION_GATEWAY_MTLS_MODE: ${{ vars.APPLICATION_GATEWAY_MTLS_MODE || 'Strict' }}
+  VALIDATE_CERTIFICATE_CHAIN_IN_PROTECTED_API: ${{ vars.VALIDATE_CERTIFICATE_CHAIN_IN_PROTECTED_API || 'false' }}
 
 jobs:
   # ------------------------------------------------------------
@@ -117,7 +118,7 @@ jobs:
             --parameters resourceGroupName='sample' `
                          apiManagementServiceName='sample' `
                          keyVaultName='sample' `
-                         validateCertificateChainInProtectedApi=false
+                         validateCertificateChainInProtectedApi=$env:VALIDATE_CERTIFICATE_CHAIN_IN_PROTECTED_API
 
       - name: Create artifacts folder
         run: |
@@ -150,10 +151,8 @@ jobs:
 
     outputs:
       AZURE_API_MANAGEMENT_GATEWAY_URL: ${{ steps.get-outputs.outputs.AZURE_API_MANAGEMENT_GATEWAY_URL }}
-      AZURE_APPLICATION_GATEWAY_MTLS_MODE: ${{ steps.get-outputs.outputs.AZURE_APPLICATION_GATEWAY_MTLS_MODE }}
       AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_VALUE: ${{ steps.get-outputs.outputs.AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_VALUE }}
       AZURE_KEY_VAULT_URI: ${{ steps.get-outputs.outputs.AZURE_KEY_VAULT_URI }}
-      VALIDATE_CERTIFICATE_CHAIN_IN_PROTECTED_API: ${{ steps.get-outputs.outputs.VALIDATE_CERTIFICATE_CHAIN_IN_PROTECTED_API }}
 
     steps:
       - name: Checkout code
@@ -185,10 +184,8 @@ jobs:
         run: |
           $variableNames = @(
             "AZURE_API_MANAGEMENT_GATEWAY_URL",
-            "AZURE_APPLICATION_GATEWAY_MTLS_MODE",
             "AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_VALUE",
-            "AZURE_KEY_VAULT_URI",
-            "VALIDATE_CERTIFICATE_CHAIN_IN_PROTECTED_API"
+            "AZURE_KEY_VAULT_URI"
           )
           .\.github\workflows\scripts\export-azd-env-variables.ps1 -VariableNames $variableNames
 
@@ -231,10 +228,8 @@ jobs:
         env:
           # Pass the necessary deployed resource properties as environment variables so the integration tests can access them.
           AZURE_API_MANAGEMENT_GATEWAY_URL: ${{ needs.deploy.outputs.AZURE_API_MANAGEMENT_GATEWAY_URL }}
-          AZURE_APPLICATION_GATEWAY_MTLS_MODE: ${{ needs.deploy.outputs.AZURE_APPLICATION_GATEWAY_MTLS_MODE }}
           AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_VALUE: ${{ needs.deploy.outputs.AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_VALUE }}
           AZURE_KEY_VAULT_URI: ${{ needs.deploy.outputs.AZURE_KEY_VAULT_URI }}
-          VALIDATE_CERTIFICATE_CHAIN_IN_PROTECTED_API: ${{ needs.deploy.outputs.VALIDATE_CERTIFICATE_CHAIN_IN_PROTECTED_API }}
 
       - name: Upload Test Results
         if: always()
