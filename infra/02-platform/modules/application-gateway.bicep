@@ -390,6 +390,10 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2025-05-01' =
       }
     ]
   }
+
+  dependsOn: [
+    assignRolesToAgwUserAssignedIdentity
+  ]
 }
 
 // Diagnostic settings for Application Gateway
