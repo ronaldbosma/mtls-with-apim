@@ -44,6 +44,9 @@ public class ApplicationGatewayTests
         s_notYetValidClientCertificate?.Dispose();
     }
 
+    /// <summary>
+    /// This test will fail for an APIM v2 tier where certificate chain validation is enabled, because the client certificate will be untrusted.
+    /// </summary>
     [TestMethod]
     public async Task ValidateFromAgw_AgwMtlsEndpoint_ValidClientCertificate_200OkReturned()
     {
@@ -57,8 +60,13 @@ public class ApplicationGatewayTests
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
     }
 
+    /// <summary>
+    /// When no client certificate is provided:
+    /// - In Strict mode, the Application Gateway returns a 400 Bad Request.
+    /// - In Passthrough mode, the Application Gateway forwards the request to APIM which will return a 401 Unauthorized.
+    /// </summary>
     [TestMethod]
-    public async Task ValidateFromAgw_AgwMtlsEndpoint_NoClientCertificate_400BadRequestReturned()
+    public async Task ValidateFromAgw_AgwMtlsEndpoint_NoClientCertificate_ErrorReturned()
     {
         // Arrange
         using var agwClient = new IntegrationTestHttpClient(Config.ApplicationGatewayIpAddress!, 53029, Config.ApplicationGatewayHostname!);
@@ -67,12 +75,27 @@ public class ApplicationGatewayTests
         var response = await agwClient.GetAsync("protected/validate-from-agw");
 
         // Assert
-        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        if (Config.IsApplicationGatewayMtlsModeStrict!.Value)
+        {
+            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
 
-        var content = await response.Content.ReadAsStringAsync();
-        Assert.Contains("No required SSL certificate was sent", content);
+            var content = await response.Content.ReadAsStringAsync();
+            Assert.Contains("No required SSL certificate was sent", content);
+        }
+        else
+        {
+            Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+            Assert.IsNotNull(response.ReasonPhrase);
+            Assert.AreEqual("ClientCertificateNotFound", response.ReasonPhrase);
+        }
     }
 
+    /// <summary>
+    /// The Application Gateway will forward all requests to APIM where the client certificate was signed by a trusted Intermediate CA.
+    /// APIM will check if it knows the client certificate and return 401 Unauthorized.
+    ///
+    /// This test will fail for an APIM v2 tier where certificate chain validation is enabled, because the client certificate will be untrusted.
+    /// </summary>
     [TestMethod]
     public async Task ValidateFromAgw_AgwMtlsEndpoint_UnregisteredClientCertificate_401UnauthorizedReturned()
     {
@@ -84,12 +107,15 @@ public class ApplicationGatewayTests
 
         // Assert
         Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
-        Assert.AreEqual("ClientCertificateIdentityNotMatched", response.Headers.GetValues("ErrorReason").FirstOrDefault());
-
-        var content = await response.Content.ReadAsStringAsync();
-        Assert.Contains("Invalid client certificate", content);
+        Assert.IsNotNull(response.ReasonPhrase);
+        Assert.AreEqual("ClientCertificateIdentityNotMatched", response.ReasonPhrase);
     }
 
+    /// <summary>
+    /// When an untrusted client certificate is provided: (not signed by a trusted Intermediate CA):
+    /// - In Strict mode, the Application Gateway returns a 400 Bad Request.
+    /// - In Passthrough mode, the Application Gateway forwards the request to APIM which will return a 401 Unauthorized.
+    /// </summary>
     [TestMethod]
     public async Task ValidateFromAgw_AgwMtlsEndpoint_UntrustedClientCertificate_400BadRequestReturned()
     {
@@ -100,12 +126,28 @@ public class ApplicationGatewayTests
         var response = await agwClient.GetAsync("protected/validate-from-agw");
 
         // Assert
-        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        if (Config.IsApplicationGatewayMtlsModeStrict!.Value)
+        {
+            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
 
-        var content = await response.Content.ReadAsStringAsync();
-        Assert.Contains("The SSL certificate error", content);
+            var content = await response.Content.ReadAsStringAsync();
+            Assert.Contains("The SSL certificate error", content);
+        }
+        else
+        {
+            Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+            Assert.IsNotNull(response.ReasonPhrase);
+
+            var expectedReason = Config.CertificateChainIsValidatedInProtectedApi ? "ClientCertificateNotTrusted" : "ClientCertificateIdentityNotMatched";
+            Assert.AreEqual(expectedReason, response.ReasonPhrase);
+        }
     }
 
+    /// <summary>
+    /// When an expired client certificate is provided:
+    /// - In Strict mode, the Application Gateway returns a 400 Bad Request.
+    /// - In Passthrough mode, the Application Gateway forwards the request to APIM which will return a 401 Unauthorized.
+    /// </summary>
     [TestMethod]
     public async Task ValidateFromAgw_AgwMtlsEndpoint_ExpiredClientCertificate_400BadRequestReturned()
     {
@@ -116,12 +158,26 @@ public class ApplicationGatewayTests
         var response = await agwClient.GetAsync("protected/validate-from-agw");
 
         // Assert
-        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        if (Config.IsApplicationGatewayMtlsModeStrict!.Value)
+        {
+            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
 
-        var content = await response.Content.ReadAsStringAsync();
-        Assert.Contains("The SSL certificate error", content);
+            var content = await response.Content.ReadAsStringAsync();
+            Assert.Contains("The SSL certificate error", content);
+        }
+        else
+        {
+            Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+            Assert.IsNotNull(response.ReasonPhrase);
+            Assert.AreEqual("ClientCertificateExpired", response.ReasonPhrase);
+        }
     }
 
+    /// <summary>
+    /// When an client certificate is provided that is not yet valid:
+    /// - In Strict mode, the Application Gateway returns a 400 Bad Request.
+    /// - In Passthrough mode, the Application Gateway forwards the request to APIM which will return a 401 Unauthorized.
+    /// </summary>
     [TestMethod]
     public async Task ValidateFromAgw_AgwMtlsEndpoint_NotYetValidClientCertificate_400BadRequestReturned()
     {
@@ -132,12 +188,20 @@ public class ApplicationGatewayTests
         var response = await agwClient.GetAsync("protected/validate-from-agw");
 
         // Assert
-        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        if (Config.IsApplicationGatewayMtlsModeStrict!.Value)
+        {
+            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
 
-        var content = await response.Content.ReadAsStringAsync();
-        Assert.Contains("The SSL certificate error", content);
+            var content = await response.Content.ReadAsStringAsync();
+            Assert.Contains("The SSL certificate error", content);
+        }
+        else
+        {
+            Assert.AreEqual(HttpStatusCode.Unauthorized, response.StatusCode);
+            Assert.IsNotNull(response.ReasonPhrase);
+            Assert.AreEqual("ClientCertificateNotYetValid", response.ReasonPhrase);
+        }
     }
-
 
     /// <summary>
     /// Even though a valid client certificate is provided, a 401 Unauthorized response is expected because the Application Gateway terminates the TLS connection.

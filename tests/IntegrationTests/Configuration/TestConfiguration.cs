@@ -16,6 +16,7 @@ internal class TestConfiguration
     public required bool IsApplicationGatewayIncluded { get; init; }
     public string? ApplicationGatewayHostname { get; init; }
     public IPAddress? ApplicationGatewayIpAddress { get; init; }
+    public bool? IsApplicationGatewayMtlsModeStrict { get; init; }
 
     public static TestConfiguration Load()
     {
@@ -36,6 +37,7 @@ internal class TestConfiguration
             IsApplicationGatewayIncluded = isApplicationGatewayIncluded,
             ApplicationGatewayHostname = isApplicationGatewayIncluded ? configuration.GetRequiredString("AZURE_APPLICATION_GATEWAY_NAME") : null,
             ApplicationGatewayIpAddress = isApplicationGatewayIncluded ? configuration.GetRequiredIPAddress("AZURE_APPLICATION_GATEWAY_PUBLIC_IP_ADDRESS_VALUE") : null,
+            IsApplicationGatewayMtlsModeStrict = isApplicationGatewayIncluded ? configuration.GetRequiredString("AZURE_APPLICATION_GATEWAY_MTLS_MODE") == "Strict" : null
         };
     }
 }
