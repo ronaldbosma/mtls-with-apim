@@ -303,6 +303,29 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2025-05-01' =
 
     rewriteRuleSets: [
       {
+        name: 'default-rewrite-rules'
+        properties: {
+          rewriteRules: [
+            {
+              ruleSequence: 100
+              conditions: []
+              name: 'Remove X-ARR-ClientCert HTTP header'
+              actionSet: {
+                requestHeaderConfigurations: [
+                  // We need to remove the client certificate header from the default listener,
+                  // to prevent clients from tricking APIM into thinking a successful mTLS connection was established.
+                  {
+                    headerName: 'X-Client-Certificate'
+                    headerValue: ''
+                  }
+                ]
+                responseHeaderConfigurations: []
+              }
+            }
+          ]
+        }
+      }
+      {
         name: 'mtls-rewrite-rules'
         properties: {
           rewriteRules: [
@@ -336,6 +359,13 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2025-05-01' =
               'Microsoft.Network/applicationGateways/httpListeners',
               applicationGatewayName,
               'https-listener'
+            )
+          }
+          rewriteRuleSet: {
+            id: resourceId(
+              'Microsoft.Network/applicationGateways/rewriteRuleSets',
+              applicationGatewayName,
+              'default-rewrite-rules'
             )
           }
           backendAddressPool: {
