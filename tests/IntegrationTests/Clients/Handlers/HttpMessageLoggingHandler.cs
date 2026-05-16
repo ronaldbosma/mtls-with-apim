@@ -29,11 +29,16 @@ namespace IntegrationTests.Clients.Handlers
         {
             Console.WriteLine($"[Request]: {request.Method} {request.RequestUri}");
             Console.WriteLine(await GetContentAsync(request.Content, cancellationToken));
+            Console.WriteLine();
 
             var response = await base.SendAsync(request, cancellationToken);
 
             Console.WriteLine($"[Response]: {(int)response.StatusCode} {response.ReasonPhrase}");
             Console.WriteLine(await GetContentAsync(response.Content, cancellationToken));
+            Console.WriteLine();
+
+            Console.WriteLine($"[Response Headers]:");
+            Console.WriteLine(response.Headers);
 
             return response;
         }
