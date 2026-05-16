@@ -8,7 +8,7 @@
                 <value>application/json</value>
             </set-header>
             <set-body>@{
-                string clientCertHeader = context.Request.Headers.GetValueOrDefault("X-ARR-ClientCert");
+                string clientCertHeader = context.Request.Headers.GetValueOrDefault("X-Client-Certificate");
                 X509Certificate2 certificate = null;
 
                 if (!string.IsNullOrWhiteSpace(clientCertHeader))

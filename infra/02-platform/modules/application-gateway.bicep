@@ -312,7 +312,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2025-05-01' =
               actionSet: {
                 requestHeaderConfigurations: [
                   {
-                    headerName: 'X-ARR-ClientCert'
+                    headerName: 'X-Client-Certificate'
                     headerValue: '{var_client_certificate}'
                   }
                 ]
