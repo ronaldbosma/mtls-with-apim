@@ -172,10 +172,11 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2025-05-01' =
         name: 'mtls-ssl-profile'
         properties: {
           clientAuthConfiguration: {
-            verifyClientAuthMode: 'Strict'
+            verifyClientAuthMode: applicationGatewaySettings.mtlsMode
             // By setting verifyClientCertIssuerDN to true the intermediate CA is also checked, not just the Root CA.
             // See https://learn.microsoft.com/en-us/azure/application-gateway/mutual-authentication-overview?tabs=powershell#verify-client-certificate-dn
-            verifyClientCertIssuerDN: true
+            // This only works when the mTLS mode (verifyClientAuthMode) is set to Strict.
+            verifyClientCertIssuerDN: applicationGatewaySettings.mtlsMode == 'Strict'
           }
           trustedClientCertificates: [
             {
