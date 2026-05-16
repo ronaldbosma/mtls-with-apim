@@ -53,11 +53,11 @@ param logAnalyticsWorkspaceName string
 // which breaks several demo scenarios that must remain accessible without client certificates.
 param apiManagementSku 'Developer' | 'Basic' | 'Standard' | 'Premium' | 'BasicV2' | 'StandardV2' | 'PremiumV2'
 
-@description('The mode to use for mTLS on the Application Gateway')
-param applicationGatewayMtlsMode applicationGatewayMtlsModeType
-
 @description('Whether to include the Application Gateway in the deployment')
 param includeApplicationGateway bool
+
+@description('The mode to use for mTLS on the Application Gateway')
+param applicationGatewayMtlsMode applicationGatewayMtlsModeType
 
 //=============================================================================
 // Variables
