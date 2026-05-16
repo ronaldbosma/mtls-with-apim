@@ -37,7 +37,7 @@ internal class IntegrationTestHttpClient : HttpClient
     /// Initializes a new instance of the <see cref="IntegrationTestHttpClient"/> class with the specified IP address and host header.
     /// </summary>
     /// <param name="ipAddress">The IP address to use in the base address of the HTTP client.</param>
-    /// <param name="port">The port to use in the base address of the HTTP client. If not specified, the default HTTPS port 443 will be used.</param>
+    /// <param name="port">The port to use in the base address of the HTTP client.</param>
     /// <param name="host">The value to set in the Host header of the HTTP client.</param>
     public IntegrationTestHttpClient(IPAddress ipAddress, int port, string host)
         : this(ipAddress, port, host, clientCertificate: null)
@@ -49,7 +49,7 @@ internal class IntegrationTestHttpClient : HttpClient
     /// </summary>
     /// <param name="ipAddress">The IP address to use in the base address of the HTTP client.</param>
     /// <param name="host">The value to set in the Host header of the HTTP client.</param>
-    /// <param name="port">The port to use in the base address of the HTTP client. If not specified, the default HTTPS port 443 will be used.</param>
+    /// <param name="port">The port to use in the base address of the HTTP client.</param>
     /// <param name="clientCertificate">The client certificate to use for authentication.</param>
     public IntegrationTestHttpClient(IPAddress ipAddress, int port, string host, X509Certificate2? clientCertificate)
         : base(CreateHttpHandler(skipServerCertificateValidation: true, certificate: clientCertificate))
