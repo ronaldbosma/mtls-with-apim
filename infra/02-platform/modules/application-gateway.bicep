@@ -309,7 +309,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2025-05-01' =
             {
               ruleSequence: 100
               conditions: []
-              name: 'Remove X-ARR-ClientCert HTTP header'
+              name: 'Remove X-Client-Certificate HTTP request header'
               actionSet: {
                 requestHeaderConfigurations: [
                   // We need to remove the client certificate header from the default listener,
@@ -332,7 +332,7 @@ resource applicationGateway 'Microsoft.Network/applicationGateways@2025-05-01' =
             {
               ruleSequence: 100
               conditions: []
-              name: 'Add Client certificate to HTTP header'
+              name: 'Add Client certificate to HTTP request header'
               actionSet: {
                 requestHeaderConfigurations: [
                   {
